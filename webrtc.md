@@ -24,15 +24,25 @@
 ` 如果无名字空间限制,默认名字空间为:webrtc. `      
 ` XXInterface 表明这个功能部分的顶层类.`  
 ` XXFactory 表明这个功能部分的构造器`  
-# 基本组成
-- 采集
-- 编码
-- 传输
-- 解码
-- 后处理（特效）
-- 渲染  
-  
-采集-->编码-->传输-->解码-->(特效)-->渲染  
+# 基本组成  
+
+```plantuml
+@startuml
+participant 线程模型 as th
+participant 采集 as cap
+participant 编码 as enc
+participant 传输_收发 as tra
+participant 解码 as dec 
+participant 后处理_特效 as post
+participant 渲染  as render
+th -> cap : cap
+cap --> enc : encode
+enc --> tra : trans
+tra --> dec : decode
+dec --> post : process
+post --> render : render
+@enduml  
+```
 ## 采集
 ## 传输
 数据->rtp/rtcp混合->dtls->udp->发送  
@@ -51,7 +61,7 @@ JsepTransportController
 DtlsSrtpTransport::SetDtlsTransports
 再找。我去死结了。  
 ### [thread](.thread.md)  
-
+网络程序基本都是这模式
 ### ORTC
 RTPSender--->RTPSenderInterface
 RTPSenderVideo/Audio 使用RTPSender，在编码器后。
@@ -62,6 +72,15 @@ RtpRtcp 作什么用？
 
 PacedSender--->Pacer
 ### dtls
+```plantuml
+@startuml
+participant DtlsTransport as dtlT
+participant DtlsTransportInternal as dtlTI
+participant PacketTransportInternal as pktTI
+dtlT -> dtlTI : x
+dtlTI -> pktTI : y
+@enduml
+```
 从 DtlsTransport 开始。它应该是上和rtp相关，下和网络相关。
 DtlsTransport--->DtlsTransportInternal--->PacketTransportInternal
 构造函数需要IceTransportInternal做参数。en,大概率是对下的接口。对上也就清楚了是PacketTransportInternal 

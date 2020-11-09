@@ -66,7 +66,7 @@ ca_certificates_file = /path/to/certificate.crt
 1. 头文件信赖
 1. 工程文件间的包含/引用
 ## google 所有的项目都禁用了rtti/exceptions
-- rtti 在 gn gen 时加 user_rtti=true即可
+- rtti 在 gn gen 时加 use_rtti=true即可
 - exceptions 要修改 gn 文件,
   configs -= [ "//build/config/compiler:no_exceptions" ]
   configs += [ "//build/config/compiler:exceptions" ]
