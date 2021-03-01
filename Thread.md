@@ -15,3 +15,4 @@ OrtcFactory--->OrtcFactoryInterface,它以一堆工厂做参数，持有worker_t
 
 # 疑问
 ICE是在哪儿实现的？
+由P2PTransportChannel实现
