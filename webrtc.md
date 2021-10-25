@@ -5,6 +5,7 @@
 - [基本组成](#基本组成)
     - [采集](#采集)
     - [传输](#传输)
+        - [[sctp](.sctp.md)](#sctpsctpmd)
         - [rtp/rtcp](#rtprtcp)
         - [[thread](.thread.md)](#threadthreadmd)
         - [ORTC](#ortc)
@@ -51,6 +52,7 @@ post --> render : render
 ## 采集
 ## 传输
 数据->rtp/rtcp混合->dtls->udp->发送  
+### [sctp](.sctp.md)
 ### rtp/rtcp   
 从 third_party 目录中发现了libsrtp库.从这里开始.  
 cricket::SrtpSession封装了libsrtp.由它与其它类交互。
