@@ -23,14 +23,19 @@ package io {
 [srtp] -up- SessionSRTP
 
 [rtp] -up- Packetizer
-[rtp] -down- Packet
+[rtp] -down- rtp.Packet
 [rtp] -left- Header
 [rtp] -right- Extension
+[rtcp] -- rtcp.Packet
+[rtcp] -up- PictureLossIndication
 
 [sdp] -up- ExtMap
 [sdp] -down-  SessionDescription
 [sdp] -left-  MediaDescription
 [sdp] -right-  Attribute
+
+[dtls] -- Conn
+[ice] -- Conn
 
 @enduml
 ```

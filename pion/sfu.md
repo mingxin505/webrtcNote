@@ -1,4 +1,4 @@
-# sfu
+# sfu (Selective Forwarding Unit)
 
 ```plantuml
 @startuml
@@ -10,6 +10,7 @@ namespace sfu {
     class JSONSignal {
         ....
         1. 与信令服务器交互
+        1. 代表peer
     }
     class router {
         ....
@@ -50,10 +51,12 @@ namespace sfu {
         1. 代表整体
         1. 管理session
     }
-    SessionProvider <|...SFU
+    SFU .left.|> SessionProvider 
+    SFU .left.> Config : use
     SessionProvider ...> Session : create
     SFU ...> SessionLocal : create
     SFU *-- Session
+    SFU "1" *-- "*" DataChannel
     Peer <|... PeerLocal
     PeerLocal <|-- JSONSignal
     PeerLocal ...> Subscriber : create
@@ -66,13 +69,13 @@ namespace sfu {
     Publisher *-- PublisherTrack
     PublisherTrack o-- Receiver
     PublisherTrack o-- webrtc.TrackRemote
-    router ..|> Router
+    router .left.|> Router
     router ...> WebRTCReceiver : create
     router o-- Receiver
     webrtc.TrackerLocal <|... DownTrack
     DownTrack o- webrtc.TrackLocalWriter
     DownTrack o-- Receiver : 经典三角指向
-    WebRTCReceiver ..|> Receiver
+    WebRTCReceiver .up.|> Receiver
     WebRTCReceiver "1" o-- "3" webrtc.TrackRemote
     WebRTCReceiver "1"  o-- "*" DownTrack
     WebRTCReceiver "1" *-- "3" buffer.Buffer
