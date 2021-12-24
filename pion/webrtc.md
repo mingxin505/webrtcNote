@@ -1,5 +1,4 @@
 # webrtc
-[标准文档](https://www.w3.org/TR/webrtc/)
 ## CRC
 ```plantuml
 @startuml
@@ -103,8 +102,7 @@ namespace webrtc {
         }
         Mux -- EndPoint
         webrtc.ICETransport *-->Mux
-        webrtc.ICETransport ...> EndPoint : <<create>>
-        webrtc.DTLSTransport *--> EndPoint
+        webrtc.DTLSTransport *--> EndPoint : <<crate>> and owner >
     }
 
 }
@@ -232,3 +230,43 @@ package transport {
 }
 @enduml
 ```
+
+```plantuml
+package dtls {
+    package protocol {
+        class Content
+    }
+    package recordplayer {
+        class RecorderPlayer {
+            1. byte <--> struct
+        }
+        RecorderPlayer *-- Header
+        RecorderPlayer *-- Content
+    }
+    class handshakeConfig
+    interface CipherSuite {
+        1. 纯虚构，接口隔离，依赖倒置，高内聚，低耦合
+        1. 子类完成具体的加密、解密操作
+    }
+    class Conn {
+        .....
+        1. 代表一个连接
+        1. 实现协议内相关处理.eg(握手，心跳)
+        1. 为读写操作提供透明加密、解密功能
+        1. 依赖 net.Conn 使用下层服务
+    }
+    class State {
+        ....
+        1. 保存了连接的状态
+    }
+    CipherSuite <|.. Aes128Ccm
+    CipherSuite <|..TLSEcdheEcdsaWithAes128GcmSha256
+    packet *-- RecorderPlayer
+    net.Conn <|.. Conn
+    Conn ..> Config :depend
+    Conn ..> packet : use
+    Conn *-- State
+    State *-- CipherSuite
+}
+````
+采用非对称加密，证书是公钥用于加密，私钥解密

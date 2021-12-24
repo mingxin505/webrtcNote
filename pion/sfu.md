@@ -7,6 +7,14 @@ namespace sfu {
     interface Router
     interface Session
     interface SessionProvider
+    interface MessageProcessor
+    class chainHandler {}
+    class DataChannel {
+        ....
+        1. 中间件的封装
+        1. 中间件处理的入口，其实是个组合模式
+    }
+    DataChannel "1" *-- "*" MessageProcessor 
     class JSONSignal {
         ....
         1. 与信令服务器交互
@@ -51,6 +59,7 @@ namespace sfu {
         1. 代表整体
         1. 管理session
     }
+
     SFU .left.|> SessionProvider 
     SFU .left.> Config : use
     SessionProvider ...> Session : create

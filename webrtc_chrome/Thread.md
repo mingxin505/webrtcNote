@@ -1,9 +1,19 @@
 # thread  
 
 ## 结构
-Thread-派生自-->MessageQueue，
-MessageQueue使用Message作为队列元素。Message有MessageHandler,MessageData等元素。
-谁想被回调，谁实现MessageHandler接口。
+```plantuml
+@startuml
+Thread -up-|> MessageQueue
+MessageQueue ..left.> Message : use
+Message *-- MessageHandler
+Message *-- MessageData
+MessageHandler <|... CustomImpl
+class CustomImpl {
+    ....
+    外部实现的回调。
+}
+@enduml
+```
 除此之外，还有signal-slot,谁想接收谁去实现slot.
 **线程可以驱动网络IO，也可以作为消息循环而存在。有了它凡是异步操作都可以经由它实现。**
 ThreadManager并不是管理Thread集，只是Thread的封装，方便管理而已。

@@ -75,6 +75,7 @@ namespace webrtc {
     interface MediaStreamInterface
     interface AudioTrackerInterface
     interface PeerconnectionInterface
+    interface VideoStreamEncoderInterface
     class PeerConnection {
         1. 接口的实现
     }

@@ -39,3 +39,14 @@ package io {
 
 @enduml
 ```
+
+```plantuml
+@startuml
+[dtls] -- Conn
+[dtls] --> net.Conn
+
+[ice] -- ice.Conn
+[ice] -- Agent
+@enduml
+```
+DTLS 依赖下层的连接对象(net.Conn),向上层提供封装后的连接对象(net.Conn)
