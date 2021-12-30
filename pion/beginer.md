@@ -1,3 +1,15 @@
+<!-- TOC -->
+
+- [简介](#简介)
+- [常规](#常规)
+    - [示例程序](#示例程序)
+    - [[模块依赖](./webrtcP.md)](#模块依赖webrtcpmd)
+    - [常见服务端结构](#常见服务端结构)
+        - [Mesh 方案](#mesh-方案)
+        - [MCU（Multipoint Conferencing Unit）方案](#mcumultipoint-conferencing-unit方案)
+        - [SFU（Selective Forwarding Unit）方案，](#sfuselective-forwarding-unit方案)
+
+<!-- /TOC -->
 # 简介
 1. webrtc 服务端实现
 # 常规
