@@ -81,9 +81,9 @@ PacedSender--->Pacer
 ### dtls
 ```plantuml
 @startuml
-participant DtlsTransport as dtlT
-participant DtlsTransportInternal as dtlTI
-participant PacketTransportInternal as pktTI
+participant DtlsTransport as dtls
+participant DtlsTransportInternal as dtlsi
+participant PacketTransportInternal as pkti
 dtlT -> dtlTI : x
 dtlTI -> pktTI : y
 @enduml

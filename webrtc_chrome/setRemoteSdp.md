@@ -3,9 +3,9 @@
 title  来自调试,收到SDP之后的动作
 participant work_thread_ as MQ <<MessageQueue>>
 participant ConnMicManager as MH <<MessageHandler>>
-participant BaseClient as BC <<BaseClient>>
-participant PeerClient as PCli <<PeerClient>>
-participant pcp as PCP <<PeerConnectionProxy>>
+participant base_client_ as BC <<BaseClient>>
+participant peer_client_ as PCli <<PeerClient>>
+participant pc_proxy_ as PCP <<PeerConnectionProxy>>
 [->> MQ : Post
 ==业务操作==
 [-> MQ : Dispatch
@@ -22,9 +22,9 @@ PCli -> PCP : SetRemoteDescription
 activate PCP
 ==以下为webrtc==
 participant connection_ as PC <<PeerConnection>>
-participant ch as VC <<cricket::VideoChannel>>
-participant mch as WRVC <<cricket::WebRtcVideoChannel>>
-participant ss as WRVCSS <<cricket::WebRtcVideoChannel::VideoSendStram>>
+participant video_channel_ as VC <<cricket::VideoChannel>>
+participant webrtc_video_channel_ as WRVC <<cricket::WebRtcVideoChannel>>
+participant video_send_stream_ as WRVCSS <<cricket::WebRtcVideoChannel::VideoSendStram>>
 participant call_ as CALL <<webrtc::internal::Call>>
 participant wrivs as WRIVS <<webrtc::internal::VideoSendStram>>
 participant impl as WRIVSI <<webrtc::internal::VideoSendStramImpl>>
@@ -223,6 +223,7 @@ WRVMC -> WRASS : new
 WRASS -> CALL : CreateAudioSendStream
 @enduml
 ```
+```plantuml
 participant brd as BRD <<VideoBroadcaster>>
 participant sink as SINK <<CVideoRenderEx>>
 SINK -> PCli : OnVideoFrame 
@@ -232,7 +233,7 @@ activate UIM
 UIM -> UIM : WriteLocalBuffer
 UIM ->> UIM : PostMessage
 ==怎么编码并发送的？==
-
+```
 
 ```plantuml
 @startuml

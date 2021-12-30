@@ -3,14 +3,24 @@
 ## 结构
 ```plantuml
 @startuml
-Thread -up-|> MessageQueue
-MessageQueue ..left.> Message : use
-Message *-- MessageHandler
-Message *-- MessageData
-MessageHandler <|... CustomImpl
-class CustomImpl {
-    ....
-    外部实现的回调。
+package rtc {
+    class Thread {
+        Invoke() 
+        Send() 
+    }
+    note left: "invoke 是便捷函数，内部调用了Send \n send 用于发起异步调用"
+    Thread -up-|> MessageQueue
+    MessageQueue ..left.> Message : use
+    MessageQueue o-- SocketServer
+    Message *-- MessageHandler
+    Message *-- MessageData
+
+    MessageHandler <|... CustomImpl
+    class CustomImpl {
+        ....
+        1. 外部实现的回调。
+        1. 简化版本命令模式
+    }
 }
 @enduml
 ```

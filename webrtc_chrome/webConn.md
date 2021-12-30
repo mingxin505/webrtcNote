@@ -1,9 +1,9 @@
 ```plantuml
 @startuml
-participant a
-participant b
+participant call as a <<主叫方>>
+participant signalSvr as b <<信令服务器>>
+participant caller as p <<被叫方>>
 
-participant p
 a -> b : regist
 p -> b : regist
 a -> b : ring

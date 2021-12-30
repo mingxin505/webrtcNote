@@ -6,8 +6,7 @@
 1. 易于扩展
 1. 
 
-## 传输、渲染
-
+# 发送（从采集到网络）
 ## 采集
 数据采集一般有两种方式
 1. 外部控制频率
@@ -44,6 +43,7 @@ APP 类是外部输入的入口点。
 VideoBroadcaster 是个组合模式。加入到它的VideoSinkInterface都能收到输出。
 FAQ: 
 1. VideoSourceBase 作用是什么？
+1. 
 ```plantuml
 title audio
 package webrtc {
@@ -63,16 +63,19 @@ package webrtc {
         RegisterEncodeCompleteCallback()
 
     }
-    interface EncodedImageCallback {}
+    interface EncodedImageCallback {
+        OnEncodedImage()
+    }
     interface VideoStreamInterface
     interface EncoderSink {
-        它比EncodedImageCallback 增加了编码配置变更功能
+        OnEncoderConfigurationChanged()
+        ....
     }
     class VideoSender {
         AddVideoFrame() 
     }
     class VideoStreamEncoder {
-
+        1. 缓冲区在这里
     }
     VideoStreamInterface +-- EncoderSink
     EncodedImageCallback <|... VideoStreamEncoder
@@ -118,13 +121,184 @@ FAQ:
 1. 如果想增加一种编码格式应该怎么做？
 1. 如果想增加多分辨率输出应该怎么做？  
 
-输出，由于VideoStreamEncoder 实现了EncodedImageCallback接口，所以回调又调回来了。由它继续向VideoStramEncoder::EncoderSink传递。
+输出，由于VideoStreamEncoder 实现了EncodedImageCallback接口，所以回调又调回来了。由它继续向VideoStramEncoder::EncoderSink传递。EncoderSink 增加了编码配置变更功能
+
 ## 传输
 ```plantuml
-package webrtc {
-    package internal {
-VideoSendStreamImpl ..|> VideoStreamEncoderInterface::EncoderSink
-}
+namespace webrtc {
+    class VideoSendStream
+    interface RtpVideoSenderInterface {
+        OnEncodedImage()
+    }
+    namespace internal {
+        VideoSendStream --|> webrtc.VideoSendStream
+        VideoSendStream *-- VideoSendStreamImpl  : use
+        VideoSendStreamImpl ..|> VideoStreamEncoderInterface::EncoderSink
+        VideoSendStreamImpl *-- RtpVideoSenderInterface : <<create>> and use
+    }
 }
 ```
-VideoSendStreamImpl 从VideoStreamEncoderInterface::EncoderSink派生，意在能接收编码阶段的输出，与编码阶段衔接。
+```plantuml
+participant VideoSendStreamImpl
+-> VideoSendStreamImpl : OnEncodedImage
+activate  VideoSendStreamImpl 
+VideoSendStreamImpl --> RtpVideoSenderInterface : OnEncodedImage
+```
+VideoSendStreamImpl 从VideoStreamEncoderInterface::EncoderSink派生，意在能接收编码阶段的输出，与编码阶段衔接;VideoSendStream使用 VideoSendStreamImpl意在做接口-实现分离;使用RtpVideoSenderInterface意在把编码数据发向rtp.
+```plantuml
+package webrtc {
+    interface RtpVideoSenderInterface
+    interface RtpRtcp {
+        SendOutgoingData()
+    }
+    interface RtcpFeedbackSenderInterface
+    RtpVideoSender ...|> RtpVideoSenderInterface
+    RtpVideoSender "1" *--> "*" RtpRtcp
+    RtpRtcp --|> Module
+    RtpRtcp --|> RtcpFeedbackSenderInterface
+}
+```
+目光转移到RtpVideoSender,它使用RtpRtcp。RtpRtcp从名字上看rtp,rtcp全包了,父类RtcpFeedbackSenderInterface明显是用于发送rtcp包。
+```plantuml
+package webrtc {
+    class RTPSender {
+       + SendOutgoingData()
+    }
+    ModuleRtpRtcpImpl ..|> RtpRtcp
+    ModuleRtpRtcpImpl ..|> RTCPReceiver.ModuleRtpRtcp
+    ModuleRtpRtcpImpl o--> RTPSender
+    RTPSender *--> RTPSenderVideo
+    RTPSenderVideo *--> Transport
+    RTPSender *--> RTPSenderAudio
+}
+```
+```plantuml
+participant video_sender_ <<RTPVideoSender>> 
+participant ModuleRtpRtcpImpl
+participant rtp_sender_ <<RTPSender>>
+-> video_sender_ : OnEncodedImage
+video_sender_ -> ModuleRtpRtcpImpl : SendOutgoingData
+ModuleRtpRtcpImpl -> rtp_sender_ : SendOutgoingData
+rtp_sender_ -> RTPSenderVideo : SendVideo
+RTPSenderVideo -> rtp_sender_ : SendToNetwork
+rtp_sender_ -> Transport : SendRtp 
+```
+在RTPSender中，区分了音频和视频，然后各自发送。以Video为例。
+到了RTPSenderVideo后，就打成RTP包。交给Transport。
+````plantuml
+package webrtc {
+    interface Transport {
+        SendRtcp()
+        SendRtp()
+    }
+    class RtpTransportInternal {}
+}
+package cricket {
+    interface NetworkInterface {
+        SendPacket()
+        SendRtcp()
+        SetOption()
+    }
+    MediaChannel +-- NetworkInterface
+    VideoMediaChannel -left-|> MediaChannel
+    WebRtcVideoChannel -left-|> VideoMediaChannel
+    WebRtcVideoChannel -left-|> Transport
+
+    BaseChannel ..|> NetworkInterface
+    BaseChannel *-- RtpTransportInternal
+    RtpDataChannel --|> BaseChannel
+    VoiceChannel --|> BaseChannel
+    VideoChannel --|> BaseChannel
+}
+````
+```plantuml
+participant WebRtcVideoChannel 
+participant BaseChannel <<NetworkInterface>>
+-> WebRtcVideoChannel : SendRtp
+WebRtcVideoChannel -> BaseChannel
+BaseChannel -> RtpTransportInternal
+```
+Transport 用于数据发送
+WebRtcVideoChannel 开始执行
+BaseChannel功能比它的派生类多。
+FAQ:
+1. NetworkInterface 如何与ICE的 Connection 关联起来
+
+```plantuml
+package webrtc {
+    interface RtpTransportInterface
+    interface SrtpTransportInterface
+    interface RtpTransportInternal
+    RtpTransport *-- rtc.PacketTransportInternal
+    RtpTransport .left.|> RtpTransportInternal
+    RtpTransportInternal .left.|> SrtpTransportInterface
+    SrtpTransportInterface .left.|> RtpTransportInterface
+}
+package rtc {
+    interface PacketTransportInternal
+}
+package cricket {
+    interface DtlsTransportInternal
+    interface IceTransportInternal
+    DtlsTransportInternal ..|> rtc.PacketTransportInternal
+    DtlsTransport ..|> DtlsTransportInternal
+    DtlsTransport *-- IceTransportInternal
+    P2PTransportChannel ..|> IceTransportInternal
+}
+```
+```plantuml
+participant rtp_transport_ <<RtpTransport>> 
+participant transport_ <<DtlsTransport>> 
+participant ice_transport_ <<P2PTransportChannel>> 
+participant selected_conn <<Connection>>
+->  rtp_transport_ : SendPacket
+rtp_transport_ -> transport_ : SendPacket
+transport_ -> ice_transport_ : SendPacket
+ice_transport_ -> selected_conn : Send
+```
+从rtp到dtls再到ice,没什么需要额外说明的，很清楚。P2PTransportChannel 表示一个ICE连接，selected_conn 代表一个UDP连接。
+````plantuml
+package cricket {
+    interface CandidatePairInerface {
+        local_candidate()
+        remote_candidate()
+    }
+    Connection ..|> CandidatePairInerface
+    Connection ..|> rtc.MessageHandler
+    ProxyConnection --|> Connection
+    ProxyConnection *-- Port
+    Port ..|> PortInterface
+    Port ..|> rtc.MessageHandler
+    UDPPort --|> Port
+    UDPPort o--> rtc.AsyncPacketSocket
+    StunPort --|> UDPPort
+}
+````
+```plantuml
+participant connect_ <<ProxyConnection>>
+participant port_ <<StunPort>>
+participant socket_ <<AsyncPacketSocket>>
+-> connect_ : Send
+connect_ -> port_ : SendTo
+port_ -> socket_ : SendTo
+```
+Connection 类的对象响应线程消息事件，收取数据时会用到。
+UDPPort 使用 rtc.AsyncPacketSocket实现发送。
+```plantuml
+package rtc {
+    class AsyncPacketSocket
+    AsyncUDPSocket *-- AsyncSocket
+    AsyncUDPSocket --|> AsyncPacketSocket
+    PhysicalSocket --|> AsyncSocket
+    AsyncSocket --|> Socket
+}
+```
+```plantuml
+participant socket_ <<AsyncUDPSocket>>
+participant socket__ <<PhysicalSocket>>
+-> socket_ : SendTo
+socket_ -> socket__ : SendTo
+socket__ -> SystemAPI : sendto
+```
+最终调用系统API，实现发送功能。
+## 渲染
