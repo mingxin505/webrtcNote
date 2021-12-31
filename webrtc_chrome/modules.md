@@ -39,18 +39,19 @@ namespace cricket {
     }
     Abstract MediaChannel {}
     interface NetworkInterface {}
+    interface RtpTransportControllerInterface
     class CompositeMediaEngine <WebRtcVoiceEngine,VideoEngine >{ 
     } 
     class WebRtcVoiceEngine {
         1. WebRtcVoiceMediaChannel的友元
     }
+
     MediaChannel o-- NetworkInterface
     NetworkInterface --+ MediaChannel 
     note "networkInterface是内部类\n" as N1
     MediaChannel .. N1
     N1 .. NetworkInterface
-    RtpTransportControllerAdapter o-- ChannelManager
-    RtpTransportControllerAdapter *-- VoiceChannel
+
     ChannelManager --> VoiceChannel : create 
     BaseChannel --|> NetworkInterface
     BaseChannel o-- MediaChannel
@@ -110,5 +111,3 @@ RtpSender -- WebRtcVoiceChannel
 WebRtcVoiceChannel -- BaseChannel
 @enduml
 ```
-# 猜测
-Session 包含 Connection 包含 BaseChannel 包含 MediaChannel 包含 MediaStream 包含 MediaTracker
