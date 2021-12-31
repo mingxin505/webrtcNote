@@ -1,16 +1,39 @@
 ```plantuml
 package webrtc {
+    interface SctpTransportInternalFactory
     interface AudioEncoderFactory
     interface videoEncoderFactory
     interface AudioDecoderFactory
     interface videoDecoderFactory
     interface PeerConnectionInterface
+    interface VideoSourceInterface
+    interface VideoTrackInterface
+    interface AudioSourceInterface
+    interface AudioTrackInterface
+    interface DataChannelProviderInterface
+    interface PeerConnectionInternal
+    interface PeerConnectionInterface
     interface PeerConnectionFactoryInterface {
         CreatePeerConnection() : PeerConnectionInterface
+        CreateAudioTrack() : AudioTrackInterface
+        CreateAudioSource() : AudioSourceInterface
+        CreateVideoTrack() : VideoTrackInterface
+        CreateVideoSource() : VideoSourceInterface
+    }
+    class PeerConnectionFactory {
+
     }
     PeerConnectionFactoryInterface ..> PeerConnectionInterface : <<create>>
+    PeerConnectionFactory *-> cricket.ChannelManager : <<create and use>>
     PeerConnectionFactory ..left.|> PeerConnectionFactoryInterface
-    
+    PeerConnection ..|> rtc.MessageHandle
+    PeerConnection .left.|> DataChannelProviderInterface
+    PeerConnection .left.|> PeerConnectionInternal
+    PeerConnectionInternal .left.|>PeerConnectionInterface
+    PeerConnection o-up-> PeerConnectionFactory
+    PeerConnectionFactory ..> SctpTransportInternalFactory : <<create>>
+    VideoTrackInterface *-> VideoSourceInterface
+    AudioTrackInterface *-> AudioSourceInterface
 }
 ```
 **工厂方法设计模式**，使系统可以在需要的时候创建具体的对象,也使外部决定创建什么类型的具体对象。
@@ -22,3 +45,5 @@ CreateBuildinVideoDecoderFactory 都是全局函数，由webrtc提供的默认�
 CreatePeerConnectionFactory 也是个全局函数，它有network_thread, 
 worker_thread, 
 signaling_thread 三个线程做可选参数，外部不传就创建。
+
+PeerConnectionFactory 负责创建 Audio/Video  的track/source,然后常见用法是把source设置给track,再把track添加到PeerConnection里。

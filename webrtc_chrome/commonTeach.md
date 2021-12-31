@@ -24,4 +24,6 @@ void init() {
 }
 ```
 # invoke
+invoke调用是异步调用，它确保所有的调用在同一个线程内，以解决跨线程问题。
 # messageQueue
+messageQueue 和 Thread 协作。凡是派生自 MessageHandler 的类，都可以作为任务丢到messqgeQueue中，由 thread 执行。

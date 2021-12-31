@@ -22,3 +22,4 @@ package cricket {
     WebRtcVoiceEngine --> AudioProcessing
 }
 ```
+ChannelManager 被 PeerConnectionFactory 拥有,PeerConnection 持有 PerrConnectionFactory 实例，所以相关的创建活动由PeerConnection发起与操作。
