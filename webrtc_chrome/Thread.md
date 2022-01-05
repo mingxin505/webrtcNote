@@ -3,7 +3,7 @@
 ## 结构
 ```plantuml
 @startuml
-package rtc {
+package rtc { 
     class Thread {
         Invoke() 
         Send() 

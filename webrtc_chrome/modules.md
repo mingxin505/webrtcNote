@@ -2,7 +2,7 @@
 ```plantuml
 @startuml
 title  Voice 为主，还是没找到核心流程， 从哪儿来，到哪儿去，没搞清楚 
-namespace webrtc {
+namespace webrtc { 
     class RTPSender {
 
     }
@@ -26,7 +26,7 @@ namespace webrtc {
     OrtcpRtpReceiverAdapter ..> cricket.VoiceChannel
 
 }
-namespace cricket {
+namespace cricket { 
     class BaseChannel {
         1. 距离IO更近
     }
@@ -71,7 +71,7 @@ namespace cricket {
 ```plantuml
 @startuml
 title "从上到下，注重Video"
-namespace webrtc {
+namespace webrtc { 
     interface ObserverInterface
     interface MediaStreamInterface
     interface AudioTrackerInterface
@@ -106,8 +106,9 @@ namespace webrtc {
 
 ```plantuml
 @startuml
-title 各层关系图 
+title 各层关系图  
 RtpSender -- WebRtcVoiceChannel 
 WebRtcVoiceChannel -- BaseChannel
+
 @enduml
 ```

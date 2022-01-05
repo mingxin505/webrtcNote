@@ -57,19 +57,22 @@ package rtc {
     
 }
 ```
+BasicNetworkManager 由 PeerConnectionFactory 创建，由 PeerConnection 使用, 因此创建socket的任务就这么由 peerconnection 完成了。  
 BasicNetworkManager 派生自 MessageHandler，故可以放到MessageQueue 中，进而由 Thread 驱动。
 派生自 NetworkManagerBase 实现了“接口、实现”分离，方便使用。
 ```plantuml
 title "创建“
 participant netMgr_ as bnwmgr <<BasicNetworkManager>>
 participant pss_ as pss <<PhysicalSocketServer>>
+participant sdisp_ as sdisp <<SocketDispatcher>>
+
 [-> bnwmgr : OnMessage
 note left : "驱动它的线程由业务层创建"
 bnwmgr -> bnwmgr : UpdateNetworksContinually
 bnwmgr -> bnwmgr : UpdateNetworksOnce
 bnwmgr -> bnwmgr : QueryDefaultLocalAddress
 bnwmgr -> pss : CreateAsyncSocket
-pass --> bnwmgr : <<return>> SocketDispatcher
+pss --> bnwmgr : <<return>> SocketDispatcher
 bnwmgr -> sdisp : create 
 ```
 
@@ -85,7 +88,7 @@ bnwmgr -> bnwmgr : UpdteNetworksContinually
 如上图，StartUpdating 触发OnMessage后，UpdteNetworksContinually 会周期性的把自己放到线程队列中执行。它只管状态，那收发由谁处理呢？由Socket的派生类。
 
 ```plantuml
-title "读写”
+title "读写” 
 participant thr_ as thr <<Thread>>
 participant mq_ as mq <<MessageQueue>>
 participant socksvr_ as pss <<PhysicalSocketServer>>

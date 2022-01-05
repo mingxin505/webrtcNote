@@ -1,6 +1,6 @@
 ```plantuml
 @startuml
-title channel 创建
+title channel 创建 
 participant sdpf_ as sdpf <<PeerConnection>>
 participant connection_ as pc <<PeerConnection>>
 participant chMgr_ as chmgr <<PeerConnection>>

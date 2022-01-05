@@ -6,7 +6,7 @@ interface SctpTransportInternal
 interface DataChannelInterface {
     RegisterObserver()
     UnregisterObserver()
-}
+} 
 class DataChannel {
     {static} Create() : DataChannel
 }

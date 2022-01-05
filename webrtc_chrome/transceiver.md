@@ -42,3 +42,8 @@ VideoTrackInterface ..|> videoSourceInterface
 AudioTrackInterface ..|> MediaStreamTrackInterface
 ```
 以上这些类不参与数据传递，只是控制功能。
+
+```plantuml
+title "添加，删除"
+
+```

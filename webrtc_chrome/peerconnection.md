@@ -36,7 +36,7 @@ package webrtc {
     AudioTrackInterface *-> AudioSourceInterface
 }
 ```
-**工厂方法设计模式**，使系统可以在需要的时候创建具体的对象,也使外部决定创建什么类型的具体对象。
+**工厂方法**设计模式，使系统可以在需要的时候创建具体的对象,也使外部决定创建什么类型的具体对象。
 
 CreateBuildinAudioEncoderFactory  
 CreateBuildinVideoEncoderFactory  

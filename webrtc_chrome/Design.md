@@ -5,7 +5,24 @@
 1. 易于使用
 1. 易于扩展
 1. 
+# 层
+```plantuml
+@startuml
+title 分层结构
+[AV 采集] AS 1
+1 -- Output
+1 -- Callback
+[编码、解码] AS 2
+[媒体协议集] AS 3
+[加密、解密] AS 4 
+[网络输入、输出] AS 5
 
+1 -- 2
+2 -- 3
+3 -- 4
+4 -- 5 
+@enduml
+```
 # 发送（从采集到网络）
 ## 采集
 数据采集一般有两种方式
@@ -23,7 +40,7 @@ package webrtc {
     interface CreateSessionDescriptionObserver
     interface AudioTrackSinkInterface
 }
-package rtc {
+package rtc { 
     interface VideoSinkInterface
     class AdaptedVideoTrackSource {
         + OnFrame(VideoFrame & frm) // 自有
@@ -45,7 +62,7 @@ FAQ:
 1. VideoSourceBase 作用是什么？
 1. 
 ```plantuml
-title audio
+title audio 
 package webrtc {
     class AudioProcessingImpl {
         + ProcessStream(AudioFrame* frm)
@@ -56,7 +73,7 @@ package webrtc {
 编码由于比较慢，所以一般是异步。
 输入队列 --> 编码过程 --> 输出回调
 ```plantuml
-title video
+title video 
 package webrtc {
     interface VideoEncoder {
         Encode()
@@ -88,7 +105,7 @@ package webrtc {
 ```
 
 ```plantuml
-title video
+title video 
 participant VideoStreamEncoder as VSE
 participant VideoSender as VS
 participant VideoEncoder as VE
@@ -125,7 +142,7 @@ FAQ:
 
 ## 传输
 ```plantuml
-namespace webrtc {
+namespace webrtc { 
     class VideoSendStream
     interface RtpVideoSenderInterface {
         OnEncodedImage()
@@ -139,14 +156,14 @@ namespace webrtc {
 }
 ```
 ```plantuml
-participant VideoSendStreamImpl
+participant VideoSendStreamImpl 
 -> VideoSendStreamImpl : OnEncodedImage
 activate  VideoSendStreamImpl 
 VideoSendStreamImpl --> RtpVideoSenderInterface : OnEncodedImage
 ```
 VideoSendStreamImpl 从VideoStreamEncoderInterface::EncoderSink派生，意在能接收编码阶段的输出，与编码阶段衔接;VideoSendStream使用 VideoSendStreamImpl意在做接口-实现分离;使用RtpVideoSenderInterface意在把编码数据发向rtp.
 ```plantuml
-package webrtc {
+package webrtc { 
     interface RtpVideoSenderInterface
     interface RtpRtcp {
         SendOutgoingData()
@@ -160,7 +177,7 @@ package webrtc {
 ```
 目光转移到RtpVideoSender,它使用RtpRtcp。RtpRtcp从名字上看rtp,rtcp全包了,父类RtcpFeedbackSenderInterface明显是用于发送rtcp包。
 ```plantuml
-package webrtc {
+package webrtc { 
     class RTPSender {
        + SendOutgoingData()
     }
@@ -173,7 +190,7 @@ package webrtc {
 }
 ```
 ```plantuml
-participant video_sender_ <<RTPVideoSender>> 
+participant video_sender_ <<RTPVideoSender>>  
 participant ModuleRtpRtcpImpl
 participant rtp_sender_ <<RTPSender>>
 -> video_sender_ : OnEncodedImage
@@ -186,7 +203,7 @@ rtp_sender_ -> Transport : SendRtp
 在RTPSender中，区分了音频和视频，然后各自发送。以Video为例。
 到了RTPSenderVideo后，就打成RTP包。交给Transport。
 ````plantuml
-package webrtc {
+package webrtc { 
     interface Transport {
         SendRtcp()
         SendRtp()
@@ -212,7 +229,7 @@ package cricket {
 }
 ````
 ```plantuml
-participant WebRtcVideoChannel 
+participant WebRtcVideoChannel  
 participant BaseChannel <<NetworkInterface>>
 -> WebRtcVideoChannel : SendRtp
 WebRtcVideoChannel -> BaseChannel
@@ -225,7 +242,7 @@ FAQ:
 1. NetworkInterface 如何与ICE的 Connection 关联起来
 
 ```plantuml
-package webrtc {
+package webrtc { 
     interface RtpTransportInterface
     interface SrtpTransportInterface
     interface RtpTransportInternal
@@ -249,7 +266,7 @@ package cricket {
 ```plantuml
 participant rtp_transport_ <<RtpTransport>> 
 participant transport_ <<DtlsTransport>> 
-participant ice_transport_ <<P2PTransportChannel>> 
+participant ice_transport_ <<P2PTransportChannel>>  
 participant selected_conn <<Connection>>
 ->  rtp_transport_ : SendPacket
 rtp_transport_ -> transport_ : SendPacket
@@ -258,7 +275,7 @@ ice_transport_ -> selected_conn : Send
 ```
 从rtp到dtls再到ice,没什么需要额外说明的，很清楚。P2PTransportChannel 表示一个ICE连接，selected_conn 代表一个UDP连接。
 ````plantuml
-package cricket {
+package cricket { 
     interface CandidatePairInerface {
         local_candidate()
         remote_candidate()
@@ -274,7 +291,7 @@ package cricket {
     StunPort --|> UDPPort
 }
 ````
-```plantuml
+```plantuml 
 participant connect_ <<ProxyConnection>>
 participant port_ <<StunPort>>
 participant socket_ <<AsyncPacketSocket>>
@@ -285,7 +302,7 @@ port_ -> socket_ : SendTo
 Connection 类的对象响应线程消息事件，收取数据时会用到。
 UDPPort 使用 rtc.AsyncPacketSocket实现发送。
 ```plantuml
-package rtc {
+package rtc { 
     class AsyncPacketSocket
     AsyncUDPSocket *-- AsyncSocket
     AsyncUDPSocket --|> AsyncPacketSocket
@@ -295,7 +312,7 @@ package rtc {
 ```
 ```plantuml
 participant socket_ <<AsyncUDPSocket>>
-participant socket__ <<PhysicalSocket>>
+participant socket__ <<PhysicalSocket>> 
 -> socket_ : SendTo
 socket_ -> socket__ : SendTo
 socket__ -> SystemAPI : sendto
