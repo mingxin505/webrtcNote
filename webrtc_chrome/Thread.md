@@ -8,7 +8,7 @@ package rtc {
         Invoke() 
         Send() 
     }
-    note left: "invoke 是便捷函数，内部调用了Send \n send 用于发起同步调用，只是为了能在同一线程执行"
+    note left: "invoke 是便捷函数，内部调用了Send \n send 用于发起同步调用，只是为了能在同一(Thread)线程中执行"
     Thread -up-|> MessageQueue
     MessageQueue ..left.> Message : use
     MessageQueue o-- SocketServer
