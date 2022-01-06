@@ -1,4 +1,4 @@
-# 未完
+# MediaEngine
 ```plantuml
 package webrtc {
     class AudioProcessing {
@@ -13,12 +13,19 @@ package cricket {
     }
     interface DataEngineInterface
     class ChannelManager
+    class WebRtcMediaEngineFactory {
+        {static} Create()
+    }
+    note left: "静态方法可以随便被调用 \n  
     ChannelManager ..> MediaEngineInterface : use
     CompositeMediaEngine ..|> MediaEngineInterface
-    CompositeMediaEngine ..> WebRtcVoiceEngine : 模板化
-    CompositeMediaEngine ..> WebRtcVideoEngine : 模板化
+    CompositeMediaEngine ..> WebRtcVoiceEngine : use
+    CompositeMediaEngine ..> WebRtcVideoEngine : use
     ChannelManager ..> DataEngineInterface : use
-    WebRtcMediaEngineFactory ..> MediaEngineInterface : <<create>>
+    WebRtcMediaEngineFactory ..> MediaEngineInterface : <<create>> 
+    note on link: 接口间创建关系
+    WebRtcMediaEngineFactory ..> CompositeMediaEngine : <<create>>
+
     WebRtcVoiceEngine --> AudioMixer
     WebRtcVoiceEngine --> AudioProcessing
 } 
