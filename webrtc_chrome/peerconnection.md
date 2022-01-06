@@ -15,6 +15,9 @@ package webrtc {
     interface DataChannelProviderInterface
     interface PeerConnectionInternal
     interface PeerConnectionInterface
+    interface MediaEngineInterface
+    interface NetworkControllerFactoryInterface
+    interface CallFactoryInterface
     interface PeerConnectionFactoryInterface {
         CreatePeerConnection() : PeerConnectionInterface
         CreateAudioTrack() : AudioTrackInterface
@@ -25,18 +28,24 @@ package webrtc {
     class PeerConnectionFactory {
 
     }
+    class PeerConnectionFactoryDependencies
+    note left: "名字起的好随意"
+    PeerConnectionFactoryDependencies "1" o--> "3" rtc.Thread
+    PeerConnectionFactoryDependencies o--> CallFactoryInterface
+    PeerConnectionFactoryDependencies o--> MediaEngineInterface
+    PeerConnectionFactoryDependencies o--> NetworkControllerFactoryInterface
     PeerConnectionFactoryInterface ..> CallFactoryInterface : use
     PeerConnectionFactoryInterface ..> PeerConnectionInterface : <<create>>
     PeerConnectionFactory *-> cricket.ChannelManager : <<create and use>>
     PeerConnectionFactory ..left.|> PeerConnectionFactoryInterface
-    PeerConnection ..|> rtc.MessageHandle
-    PeerConnection .left.|> DataChannelProviderInterface
-    PeerConnection .left.|> PeerConnectionInternal
-    PeerConnectionInternal .left.|>PeerConnectionInterface
+    PeerConnection ...|> rtc.MessageHandle
+    PeerConnection .left..|> DataChannelProviderInterface
+    PeerConnection .left..|> PeerConnectionInternal
+    PeerConnectionInternal ..left.|>PeerConnectionInterface
     PeerConnection o-up-> PeerConnectionFactory
-    PeerConnectionFactory ..> SctpTransportInternalFactory : <<create>>
-    VideoTrackInterface *-> VideoSourceInterface
-    AudioTrackInterface *-> AudioSourceInterface
+    PeerConnectionFactory ...> SctpTransportInternalFactory : <<create>>
+    VideoTrackInterface *--> VideoSourceInterface
+    AudioTrackInterface *--> AudioSourceInterface
 }
 ```
 **工厂方法**设计模式，使系统可以在需要的时候创建具体的对象,也使外部决定创建什么类型的具体对象。

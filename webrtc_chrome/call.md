@@ -3,13 +3,23 @@ namespace webrtc {
     interface CallFactoryInterface
     class CallFactory
     CallFactory ..|> CallFactoryInterface
-    class Call
-    class PacketReceiver
-    class RecoverdPacketReceiver
+    interface Call {
+        CreateAudioSendStream()
+        CreateVideoSendStream()
+        CreateAudioReceiveStream()
+        CreateVideoReceiveStream()
+        CreateFlexfecReceiveStream()
+    }
+    interface PacketReceiver
+    interface RecoverdPacketReceiver {
+        OnRecoverdPacket()
+    }
+    note left: for recv fec
     namespace internal {
         class Call {
-            ....
-            这里是个工厂
+            ..管理..
+            1.  AV 流
+            1. 收发 AV 数据
         }
         Call --|> webrtc.Call
         Call --|> webrtc.PacketReceiver
@@ -17,6 +27,7 @@ namespace webrtc {
     }
 }
 ```
+internal::Call 派生自 Call,实现”创建“； 派生自 PacketReceiver 实现数据接收；  
 ```plantuml
 title "创建ModuleProcessThread“
 participant pcf_  as pcf <<PeerConnectionFactory>>
@@ -34,3 +45,4 @@ icall -> modPT : create
 return pt
 ```
 CallFactory 实例在创建 PeerConnectionFactory 前创建，
+Call 组件的地位处于中游，上接 MediaEngine, 下接 Transport.  

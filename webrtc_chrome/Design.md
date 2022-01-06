@@ -211,6 +211,9 @@ package webrtc {
         SendRtcp()
         SendRtp()
     }
+    interface Call 
+    note right: 实现Stream创建功能。
+
     class RtpTransportInternal {}
 }
 package cricket {
@@ -221,8 +224,9 @@ package cricket {
     }
     MediaChannel +-- NetworkInterface
     VideoMediaChannel -left-|> MediaChannel
-    WebRtcVideoChannel -left-|> VideoMediaChannel
+    WebRtcVideoChannel -up-|> VideoMediaChannel
     WebRtcVideoChannel -left-|> Transport
+    WebRtcVideoChannel o--> Call 
 
     BaseChannel ..|> NetworkInterface
     BaseChannel *-- RtpTransportInternal
