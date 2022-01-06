@@ -8,7 +8,7 @@ package rtc {
         Invoke() 
         Send() 
     }
-    note left: "invoke 是便捷函数，内部调用了Send \n send 用于发起同步调用，只是为了能在同一(Thread)线程中执行"
+    note left: "invoke 是便捷函数，内部调用了Send \n send 用于发起同步调用，\n 只是为了能在同一(Thread)线程中执行"
     Thread -up-|> MessageQueue
     MessageQueue ..left.> Message : use
     MessageQueue o-- SocketServer
@@ -32,10 +32,16 @@ participant ss_  as ss <<PyhsicalSocketServer>>
 participant mh_  as mh <<MessageHandler>>
 loop true
 [-> thr : PrrocessMessage
+activate thr
 thr -> thr : Get
+activate thr
 thr -> ss : Wait
+deactivate 
 thr -> thr : Dispatch
-thr -> MessageHandler : OnMessage
+activate thr
+thr -> mh : OnMessage
+activate mh
+return 
 end
 ```
 MessageQueue(Thread) 在其 Get 方法中处理 socket 的内容，在Dispatch中处理其它内容。因此它支持异步socket.
