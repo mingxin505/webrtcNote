@@ -8,7 +8,7 @@ package rtc {
         Invoke() 
         Send() 
     }
-    note left: "invoke 是便捷函数，内部调用了Send \n send 用于发起异步调用"
+    note left: "invoke 是便捷函数，内部调用了Send \n send 用于发起同步调用，只是为了能在同一线程执行"
     Thread -up-|> MessageQueue
     MessageQueue ..left.> Message : use
     MessageQueue o-- SocketServer
@@ -30,17 +30,18 @@ participant thr_  as thr <<Thread>>
 participant mq_  as mq <<MessageQueue>>
 participant ss_  as ss <<PyhsicalSocketServer>>
 participant mh_  as mh <<MessageHandler>>
-
+loop true
 [-> thr : PrrocessMessage
 thr -> thr : Get
 thr -> ss : Wait
 thr -> thr : Dispatch
 thr -> MessageHandler : OnMessage
+end
 ```
 MessageQueue(Thread) 在其 Get 方法中处理 socket 的内容，在Dispatch中处理其它内容。因此它支持异步socket.
 **线程可以驱动网络IO，也可以作为消息循环而存在。有了它凡是异步操作都可以经由它实现。**
 ThreadManager并不是管理Thread集，只是Thread的封装，方便管理而已。
-# ProcessThread
+# ProcessThread(处理线程)
 音视频程序在本质上都是 pipeline&Filter 架构模式。webrtc 的模块相当于Filter。 出于质量保证与监控需求，要有专门线程收集和处理模块内部的状态信息，并反馈给目标模块实现动态控制。
 ```plantuml
 interface ProcessThread
