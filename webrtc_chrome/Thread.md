@@ -85,4 +85,10 @@ pci -> mod : ProcessThreadAttached(this)
 pci -> pci : push queue
 ```
 如上图， mod 有机会知道处理自己的线程。派生类可以根据需要决定是否保存线程指针。  
-使用方式也很简单明了了。如果是模块，就从 Module 派生，然后把自己注册给 ProcessThread;如果是任务，从 QueuedTask 派生， 然后 Post 给 ProcessThread.
+使用方式也很简单明了了。如果是模块，就从 Module 派生，然后把自己注册给 ProcessThread;如果是任务，从 QueuedTask 派生， 然后 Post 给 ProcessThread.  
+
+# ProcessThread in webrtc
+webrtc有三个线程： 
+PacerProcessThread,  负责数据平滑   
+voiceProcessThread,  负责音频处理
+ModuleProcessThread 负责 AV 同步

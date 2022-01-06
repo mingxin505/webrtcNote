@@ -1,5 +1,7 @@
 ```plantuml
+page 2x2
 package webrtc {
+    interface CallFactoryInterface
     interface SctpTransportInternalFactory
     interface AudioEncoderFactory
     interface videoEncoderFactory
@@ -23,6 +25,7 @@ package webrtc {
     class PeerConnectionFactory {
 
     }
+    PeerConnectionFactoryInterface ..> CallFactoryInterface : use
     PeerConnectionFactoryInterface ..> PeerConnectionInterface : <<create>>
     PeerConnectionFactory *-> cricket.ChannelManager : <<create and use>>
     PeerConnectionFactory ..left.|> PeerConnectionFactoryInterface
