@@ -11,6 +11,7 @@ package webrtc {
 }
 package rtc {
     () AdaptedVideoTrackSource 
+    note left: "this is note"
 }
 @enduml
 ```

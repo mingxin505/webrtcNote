@@ -95,9 +95,9 @@ package webrtc {
         1. 缓冲区在这里
     }
     VideoStreamInterface +-- EncoderSink
-    EncodedImageCallback <|... VideoStreamEncoder
-    EncodedImageCallback <|... EncoderSink
-    VideoStreamEncoder *--> rtc.TaskQueue
+    EncodedImageCallback <|.. VideoStreamEncoder
+    EncodedImageCallback <|.. EncoderSink
+    VideoStreamEncoder *-> rtc.TaskQueue
     VideoStreamEncoder .right.> VideoSender :use
     VideoSender .right.> VideoEncoder : use
     VideoEncoder .right.> EncodedImageCallback : use
@@ -132,7 +132,7 @@ rtc.VideoSinkInterface <|.. VideoStreamEncoderInterface
 VideoStreamEncoderInterface <|.. VideoStreamEncoder
 }
 ```
-所以，只要能向VideoSinkInterface数据，就能放数据到VideoStreamEncoder.
+所以，只要能向VideoSinkInterface数据，就能放数据到VideoStreamEncoder.恰巧 **VideoBroadcaster 可以做这件事**
 FAQ: 
 1. VideoStreamEncoderInterface 的价值？
 1. 如果想增加一种编码格式应该怎么做？
@@ -142,6 +142,7 @@ FAQ:
 
 ## 传输
 ```plantuml
+title "video"
 namespace webrtc { 
     class VideoSendStream
     interface RtpVideoSenderInterface {
@@ -156,6 +157,7 @@ namespace webrtc {
 }
 ```
 ```plantuml
+title video
 participant VideoSendStreamImpl 
 -> VideoSendStreamImpl : OnEncodedImage
 activate  VideoSendStreamImpl 
@@ -203,6 +205,7 @@ rtp_sender_ -> Transport : SendRtp
 在RTPSender中，区分了音频和视频，然后各自发送。以Video为例。
 到了RTPSenderVideo后，就打成RTP包。交给Transport。
 ````plantuml
+title "video"
 package webrtc { 
     interface Transport {
         SendRtcp()
@@ -292,6 +295,7 @@ package cricket {
 }
 ````
 ```plantuml 
+title "data flow"
 participant connect_ <<ProxyConnection>>
 participant port_ <<StunPort>>
 participant socket_ <<AsyncPacketSocket>>

@@ -27,3 +27,5 @@ void init() {
 invoke调用是异步调用，它确保所有的调用在同一个线程内，以解决跨线程问题。
 # messageQueue
 messageQueue 和 Thread 协作。凡是派生自 MessageHandler 的类，都可以作为任务丢到messqgeQueue中，由 thread 执行。
+# module/QueuedTask
+module/QueuedTask 和 ProcessThread 协作。凡是派生自 Module 的类，可以做为模块注册给 ProcessThread 并由 ProcessThread 周期性调用；凡是派生自 QueuedTask 的类，都可以丢给 ProcessThread 并由 ProcessThread 周期性调用。
