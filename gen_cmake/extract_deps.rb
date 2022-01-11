@@ -20,7 +20,7 @@ class Extract
         elsif l.include?('cflags = ') then
         elsif l.include?('cpflags_cc = ') then
         elsif l.include?('build') then 
-             @srcs += l.split(' ')[-1] + "\n" if l.include? 'cxx' or l.include?('gcc')
+             @srcs += l.split(' ')[-1] + "\n" if l.include? ' cxx ' or l.include?(' gcc ')
              extract_dep(l) if l.include? ' alink '
         elsif l.include?('label_name') then
             @name = (l.split(' = ')[1]).gsub "\n", ''
