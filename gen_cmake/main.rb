@@ -1,28 +1,31 @@
 #!/usr/bin/env ruby
 #
+require 'logger'
+if ARGV[1]
+    fd = IO.sysopen("/proc/1/fd/1","w")
+    io = IO.new(fd,"w")
+    io.sync = true
+    MY_APPLICATION_LOG_OUTPUT = io
+else
+    MY_APPLICATION_LOG_OUTPUT = $stdout
+end
+$logger = Logger.new MY_APPLICATION_LOG_OUTPUT
 
-$s = %q{
-    defines = -D_LIBCPP_HAS_NO_ALIGNED_ALLOCATION -DCR_XCODE_VERSION=1321 -DCR_CLANG_REVISION=\"llvmorg-14-init-12719-gc4b45eeb-2\" -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_LIBCPP_ABI_UNSTABLE -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCPP_ENABLE_NODISCARD -D_LIBCPP_DEBUG=0 -DCR_LIBCXX_REVISION=79a2e924d96e2fc1e4b937c42efd08898fa472d7 -D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0 -D_DEBUG -DDYNAMIC_ANNOTATIONS_ENABLED=1 -DWEBRTC_ENABLE_PROTOBUF=1 -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE -DRTC_ENABLE_VP9 -DRTC_DAV1D_IN_INTERNAL_DECODER_FACTORY -DWEBRTC_HAVE_SCTP -DWEBRTC_APM_DEBUG_DUMP=0 -DWEBRTC_LIBRARY_IMPL -DWEBRTC_ENABLE_AVX2 -DWEBRTC_NON_STATIC_TRACE_EVENT_HANDLERS=1 -DWEBRTC_POSIX -DWEBRTC_MAC -DABSL_ALLOCATOR_NOTHROW=1
-framework_dirs =
-include_dirs = -I../.. -Igen -I../../buildtools/third_party/libc++ -I../../third_party/abseil-cpp
-cflags = -fno-delete-null-pointer-checks -fno-ident -fno-strict-aliasing -fstack-protector-strong -fcolor-diagnostics -fmerge-all-constants -fcrash-diagnostics-dir=../../tools/clang/crashreports -mllvm -instcombine-lower-dbg-declare=0 -ffp-contract=off -fcomplete-member-pointers -arch x86_64 -Wno-builtin-macro-redefined -D__DATE__= -D__TIME__= -D__TIMESTAMP__= -ffile-compilation-dir=. -no-canonical-prefixes -Wall -Werror -Wextra -Wimplicit-fallthrough -Wunreachable-code-aggressive -Wthread-safety -Wextra-semi -Wunguarded-availability -Wno-missing-field-initializers -Wno-unused-parameter -Wloop-analysis -Wno-unneeded-internal-declaration -Wenum-compare-conditional -Wno-psabi -Wno-ignored-pragma-optimize -Wshadow -O0 -fno-omit-frame-pointer -gdwarf-4 -g2 -gdwarf-aranges -Xclang -debug-info-kind=limited -isysroot ../../../../../../../Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk -mmacosx-version-min=10.11.0 -ftrivial-auto-var-init=pattern -fvisibility=hidden -Wheader-hygiene -Wstring-conversion -Wtautological-overlap-compare -Wexit-time-destructors -Wglobal-constructors -Wno-shadow -Wc++11-narrowing -Wundef -Wunused-lambda-capture
-cflags_cc = -Wno-undefined-bool-conversion -Wno-tautological-undefined-compare -std=c++17 -Wno-trigraphs -fno-aligned-new -stdlib=libc++ -fno-exceptions -fno-rtti -nostdinc++ -isystem../../buildtools/third_party/libc++/trunk/include -isystem../../buildtools/third_party/libc++abi/trunk/include -fvisibility-inlines-hidden -Wnon-virtual-dtor -Woverloaded-virtual
-label_name = agc
-target_out_dir = obj/modules/audio_processing/agc
-target_output_name = libagc
-
-build obj/modules/audio_processing/agc/agc/agc_manager_direct.o: cxx ../../modules/audio_processing/agc/agc_manager_direct.cc
-
-build obj/modules/audio_processing/agc/libagc.a: alink obj/modules/audio_processing/agc/agc/agc_manager_direct.o || obj/modules/audio_processing/agc/libclipping_predictor.a obj/modules/audio_processing/agc/libclipping_predictor_evaluator.a obj/modules/audio_processing/agc/gain_control_interface.stamp obj/modules/audio_processing/agc/gain_map.stamp obj/modules/audio_processing/agc/liblevel_estimation.a obj/modules/audio_processing/libapm_logging.a obj/modules/audio_processing/libaudio_buffer.a obj/modules/audio_processing/audio_frame_view.stamp obj/common_audio/libcommon_audio.a obj/common_audio/libcommon_audio_c.a obj/rtc_base/libchecks.a obj/rtc_base/gtest_prod.stamp obj/rtc_base/liblogging.a obj/rtc_base/librtc_base_approved.a obj/rtc_base/safe_minmax.stamp obj/system_wrappers/libfield_trial.a obj/system_wrappers/libmetrics.a obj/modules/audio_processing/vad/libvad.a obj/third_party/abseil-cpp/absl/types/optional.stamp obj/modules/audio_processing/agc/libclipping_predictor_level_buffer.a obj/rtc_base/safe_compare.stamp obj/rtc_base/type_traits.stamp obj/rtc_base/system/inline.stamp obj/rtc_base/system/rtc_export.stamp obj/third_party/abseil-cpp/absl/meta/type_traits.stamp obj/third_party/abseil-cpp/absl/base/config.stamp obj/third_party/abseil-cpp/absl/strings/strings.stamp obj/third_party/abseil-cpp/absl/strings/internal.stamp obj/third_party/abseil-cpp/absl/base/core_headers.stamp obj/third_party/abseil-cpp/absl/base/endian.stamp obj/third_party/abseil-cpp/absl/base/base.stamp obj/third_party/abseil-cpp/absl/base/atomic_hook.stamp obj/third_party/abseil-cpp/absl/base/base_internal.stamp obj/third_party/abseil-cpp/absl/base/dynamic_annotations.stamp obj/third_party/abseil-cpp/absl/base/log_severity.stamp obj/third_party/abseil-cpp/absl/base/raw_logging_internal.stamp obj/third_party/abseil-cpp/absl/base/spinlock_wait.stamp obj/third_party/abseil-cpp/absl/base/errno_saver.stamp obj/third_party/abseil-cpp/absl/base/throw_delegate.stamp obj/third_party/abseil-cpp/absl/memory/memory.stamp obj/third_party/abseil-cpp/absl/numeric/bits.stamp obj/third_party/abseil-cpp/absl/numeric/int128.stamp obj/rtc_base/macromagic.stamp obj/rtc_base/system/arch.stamp obj/rtc_base/libplatform_thread_types.a obj/rtc_base/libstringutils.a obj/api/array_view.stamp obj/third_party/abseil-cpp/absl/types/bad_optional_access.stamp obj/third_party/abseil-cpp/absl/utility/utility.stamp obj/rtc_base/libtimeutils.a obj/rtc_base/safe_conversions.stamp obj/rtc_base/synchronization/libmutex.a obj/rtc_base/synchronization/libyield.a obj/rtc_base/system/no_unique_address.stamp obj/rtc_base/atomicops.stamp obj/rtc_base/libplatform_thread.a obj/rtc_base/librtc_event.a obj/rtc_base/synchronization/libyield_policy.a obj/rtc_base/system/warn_current_thread_is_deadlocked.stamp obj/api/sequence_checker.stamp obj/rtc_base/synchronization/libsequence_checker_internal.a obj/api/task_queue/libtask_queue.a obj/rtc_base/refcount.stamp obj/api/scoped_refptr.stamp obj/rtc_base/librtc_task_queue.a obj/rtc_base/task_utils/to_queued_task.stamp obj/rtc_base/task_utils/libpending_task_safety_flag.a obj/api/refcountedbase.stamp obj/rtc_base/third_party/base64/libbase64.a obj/modules/audio_processing/libapi.a obj/modules/audio_processing/libaudio_processing_statistics.a obj/api/audio/libaec3_config.a obj/api/audio/libaudio_frame_api.a obj/api/librtp_packet_info.a obj/api/librtp_headers.a obj/api/units/libtimestamp.a obj/api/units/libtime_delta.a obj/rtc_base/units/unit_base.stamp obj/api/video/libvideo_rtp_headers.a obj/api/units/libdata_rate.a obj/api/units/libdata_size.a obj/api/units/libfrequency.a obj/third_party/abseil-cpp/absl/container/inlined_vector.stamp obj/third_party/abseil-cpp/absl/container/inlined_vector_internal.stamp obj/third_party/abseil-cpp/absl/container/compressed_tuple.stamp obj/third_party/abseil-cpp/absl/types/span.stamp obj/third_party/abseil-cpp/absl/algorithm/algorithm.stamp obj/api/audio/echo_control.stamp obj/rtc_base/system/libfile_wrapper.a obj/rtc_base/libcriticalsection.a obj/rtc_base/system/unused.stamp obj/common_audio/common_audio_c_arm_asm.stamp obj/common_audio/libcommon_audio_cc.a obj/system_wrappers/libsystem_wrappers.a obj/modules/module_api_public.stamp obj/rtc_base/librtc_numerics.a obj/rtc_base/compile_assert_c.stamp obj/rtc_base/sanitizer.stamp obj/common_audio/third_party/ooura/libfft_size_256.a obj/common_audio/third_party/spl_sqrt_floor/libspl_sqrt_floor.a obj/common_audio/sinc_resampler.stamp obj/rtc_base/memory/libaligned_malloc.a obj/common_audio/libcommon_audio_sse2.a obj/common_audio/fir_filter.stamp obj/common_audio/libcommon_audio_avx2.a obj/audio/utility/libaudio_frame_operations.a obj/modules/audio_coding/libisac_vad.a obj/modules/audio_coding/isac_bwinfo.stamp obj/rtc_base/system/ignore_warnings.stamp obj/modules/third_party/fft/libfft.a
-  arflags =
-  output_extension = .a
-  output_dir = obj/modules/audio_processing/agc
-
-}
 require_relative 'extract_deps'
+def get_content p
+  rns = ""
+  File.open(p, 'r') do |f|
+    f.each_line do |l|
+        rns += l
+    end
+  end
+  rns
+end
 def main src_root, ninja_root
-    e = Extract.new $s
+    Dir.chdir(ninja_root) 
+    rns = get_content Dir::pwd + '/obj/webrtc.ninja'
+    e = Extract.new rns
      e.gen_cmake
 end
 
-main '',''
+main '','/Users/mac/google/macos-ios/src/out/default'
