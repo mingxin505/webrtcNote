@@ -1,9 +1,10 @@
 class Extract
   def initialize ninja
+    @cmake_root = File::dirname ninja
     @srcs = ""
     @add_definitions = ""
     @include_directories = "include_directories( \n"
-    ninja.each_line do |l|
+    get_content(ninja).each_line do |l|
         if l == '' then 
             next
         end
@@ -68,7 +69,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE #{@out_dir})
 
 ADD_LIBRARY(${PROJECTNAME} STATIC ${SRC_LIST})
     }
-    File.open('CMakeLists.txt', 'w') do |f|
+    cmake_file = "#{@cmake_root}/CMakeLists.txt"
+     $logger.info "#{@name}, cmakelist.txt is #{cmake_file}"
+    File.open(cmake_file, 'w') do |f|
         f.write cmake_lists
     end
   end
@@ -100,8 +103,28 @@ ADD_LIBRARY(${PROJECTNAME} STATIC ${SRC_LIST})
                 end
             end
         end
-        $logger.info deps
+=begin
+
         $logger.info deps.size
+        if deps.size > 0 then
+        ex = Extract.new  Dir::pwd + '/' + deps[0].to_s
+        ex.gen_cmake
+        end
+=end
+# bug: 当同一目录下有多个ninja的时候，由于CMakeList.txt只能有一个，所以覆盖了。
+        deps.each do |e|
+            ex = Extract.new  Dir::pwd + '/' + e.to_s
+            ex.gen_cmake
+        end
+  end
+private  def get_content p
+    rns = ""
+    File.open(p, 'r') do |f|
+      f.each_line do |l|
+          rns += l
+      end
+    end
+    rns
   end
 end
 
