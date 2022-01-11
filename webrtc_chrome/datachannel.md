@@ -1,5 +1,13 @@
 datachannel 与 Audio/Video 不同，它通过 SCTP 收发。因此，SCTP 与 RTP/RTCP 属于同一层级。  
 ```plantuml
+package cricket {
+    interface DataMediaChannel
+    interface MediaChannel
+    RtpDataChannel ..|> BaseChannel
+    RtpDataChannel --> webrtc.DataChannel : signal 
+    RtpDataChannel --> DataMediaChannel : signal
+    MediaChannel <|.. DataMediaChannel
+}
 package webrtc {
 interface DataChannelProviderInterface
 interface SctpTransportInternalFactory
@@ -8,6 +16,7 @@ interface DataChannelInterface {
     RegisterObserver()
     UnregisterObserver()
 } 
+interface DataChannelObserver
 class DataChannel {
     {static} Create() : DataChannel
 }
