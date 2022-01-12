@@ -2,7 +2,6 @@
 page 2x2
 package webrtc {
     interface CallFactoryInterface
-    interface SctpTransportInternalFactory
     interface AudioEncoderFactory
     interface videoEncoderFactory
     interface AudioDecoderFactory
@@ -18,6 +17,8 @@ package webrtc {
     interface MediaEngineInterface
     interface NetworkControllerFactoryInterface
     interface CallFactoryInterface
+    interface DataChannelInterface
+    interface PeerConnectionObserver
     interface PeerConnectionFactoryInterface {
         CreatePeerConnection() : PeerConnectionInterface
         CreateAudioTrack() : AudioTrackInterface
@@ -41,9 +42,11 @@ package webrtc {
     PeerConnection ...|> rtc.MessageHandle
     PeerConnection .left..|> DataChannelProviderInterface
     PeerConnection .left..|> PeerConnectionInternal
+    PeerConnection *--> cricket.SctpTransportInternalFactory
+    PeerConnection ..> DataChannelInterface : <<create>>
+    PeerConnection ..> PeerConnectionObserver : use
     PeerConnectionInternal ..left.|>PeerConnectionInterface
     PeerConnection o-up-> PeerConnectionFactory
-    PeerConnectionFactory ...> SctpTransportInternalFactory : <<create>>
     VideoTrackInterface *--> VideoSourceInterface
     AudioTrackInterface *--> AudioSourceInterface
 }
@@ -59,3 +62,6 @@ worker_thread,
 signaling_thread 三个线程做可选参数，外部不传就创建。
 
 PeerConnectionFactory 负责创建 Audio/Video  的track/source,然后常见用法是把source设置给track,再把track添加到PeerConnection里。
+
+
+SctpTransportInternalFactory 用于创建 SctpTransportInternal, 用于 DataChannel。
