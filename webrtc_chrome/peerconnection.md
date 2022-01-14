@@ -45,6 +45,7 @@ package webrtc {
     PeerConnection *--> cricket.SctpTransportInternalFactory
     PeerConnection ..> DataChannelInterface : <<create>>
     PeerConnection ..> PeerConnectionObserver : use
+    PeerConnection "1" *--> "*" RtpTransceiver
     PeerConnectionInternal ..left.|>PeerConnectionInterface
     PeerConnection o-up-> PeerConnectionFactory
     VideoTrackInterface *--> VideoSourceInterface
@@ -63,5 +64,5 @@ signaling_thread 三个线程做可选参数，外部不传就创建。
 
 PeerConnectionFactory 负责创建 Audio/Video  的track/source,然后常见用法是把source设置给track,再把track添加到PeerConnection里。
 
-
+PeerConnection 通过 RTPTransceiver 负责管理 MediaStreamTrackInterface. MediaStreamTrackInterface 代表一条流(音频、视频)
 SctpTransportInternalFactory 用于创建 SctpTransportInternal, 用于 DataChannel。

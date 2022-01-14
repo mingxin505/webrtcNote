@@ -123,12 +123,14 @@ VSE --> ES : OnEncodedImage
 ```
 缓冲区在VideoStreamEncoder那儿。它接收原始数据，输出编码数据流。那它是如何接收原始数据呢？它肯定要从一个接口派生来接收数据。
 ```plantuml
-interface rtc.VideoSinkInterface {
-    OnFrame
+package rtc {
+    interface VideoSinkInterface {
+        OnFrame
+    }
 }
 package webrtc {
 interface VideoStreamEncoderInterface
-rtc.VideoSinkInterface <|.. VideoStreamEncoderInterface
+VideoSinkInterface <|.. VideoStreamEncoderInterface
 VideoStreamEncoderInterface <|.. VideoStreamEncoder
 }
 ```
