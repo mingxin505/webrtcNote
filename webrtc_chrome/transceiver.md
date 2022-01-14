@@ -1,4 +1,9 @@
 ```plantuml
+package cricket {
+    interface VoiceMediaChannel
+    interface MediaChannel
+    VoiceMediaChannel ..|> MediaChannel
+}
 package webrtc {
 interface RtpTranscieverInterface
 interface RtpSenderInternal
@@ -9,7 +14,6 @@ interface ObserverInterface {
     OnChange()
 }
 interface DtmfProviderInterface
-interface AudioMediaChannel
 RtpTransciever .|>RtpTranscieverInterface
 RtpTransciever o--> RtpSenderInternal
 RtpTransciever o--> RtpReceiverInternal
@@ -20,14 +24,15 @@ AudioRtpSender ..|> RtpSenderInternal
 AudioRtpSender ..|> ObserverInterface
 AudioRtpSender ..|> DtmfProviderInterface
 
-AudioRtpSender o-> AudioMediaChannel
+AudioRtpSender o-> VoiceMediaChannel
 AudioRtpSender o->  LocalAudioSinkAdapter
 
 LocalAudioSinkAdapter ..|> AudioSinkInterface
 LocalAudioSinkAdapter ..|> cricket.AudioSource
 }
 ```
-AudioRtpSender 如果要想发送数据，它要么是 AudioSinkInterface 的子类，自己收数据，要么持有 AudioSinkInterface 的实例，从实例中取数据。webrtc 使用后者。 
+AudioRtpSender 如果要想收数据，它要么是 AudioSinkInterface 的子类，自己收数据，要么持有 AudioSinkInterface 的实例，从实例中取数据。webrtc 使用后者; 要想发数据，需要借助 AudioMediaChannel.
+AudioMediaChannel。 AudioMediaChannel的网络接口是 VoiceChannel 实例。
 cricket.AudioSource 是下层需要的接口。  
 ```plantuml
 package webrtc {

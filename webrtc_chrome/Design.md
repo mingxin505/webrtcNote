@@ -150,36 +150,49 @@ namespace webrtc {
     interface RtpVideoSenderInterface {
         OnEncodedImage()
     }
+    interface EncoderImageCallback
+    interface EncoderSink
+    EncoderSink ..|> EncoderImageCallback
+    RtpVideoSenderInterface +-- EncoderSink
     namespace internal {
         VideoSendStream --|> webrtc.VideoSendStream
         VideoSendStream *-- VideoSendStreamImpl  : use
-        VideoSendStreamImpl ..|> VideoStreamEncoderInterface::EncoderSink
+        VideoSendStreamImpl ..|> webrtc.EncoderSink
         VideoSendStreamImpl *-- RtpVideoSenderInterface : <<create>> and use
     }
 }
 ```
+从 VideoSendStreamImpl 看起，它派生自 EncoderSink ， 因此可以接收数据; 收到的数据通过 RtpVideoSenderInterface 的派生类发出去。
+EncoderSink 派生自 EncoderImageCallback 表明可以接收编码阶段的输出。
 ```plantuml
 title video
-participant VideoSendStreamImpl 
--> VideoSendStreamImpl : OnEncodedImage
-activate  VideoSendStreamImpl 
-VideoSendStreamImpl --> RtpVideoSenderInterface : OnEncodedImage
+participant VideoSendStreamImpl as vssi <<VideoStreamEncoderInterface::EncoderSink>>
+participant RtpVideoSender as rtpvs <<RtpVideoSenderInterface>>
+
+-> vssi : OnEncodedImage
+activate  vssi 
+vssi --> rtpvs : OnEncodedImage
 ```
-VideoSendStreamImpl 从VideoStreamEncoderInterface::EncoderSink派生，意在能接收编码阶段的输出，与编码阶段衔接;VideoSendStream使用 VideoSendStreamImpl意在做接口-实现分离;使用RtpVideoSenderInterface意在把编码数据发向rtp.
+VideoSendStreamImpl 从 VideoStreamEncoderInterface::EncoderSink 派生，意在能接收编码阶段的输出，与编码阶段衔接;VideoSendStream使用 VideoSendStreamImpl意在做接口-实现分离;使用RtpVideoSenderInterface意在把编码数据发向rtp.
 ```plantuml
 package webrtc { 
     interface RtpVideoSenderInterface
+    interface RtpTransportControllerSendInterface {
+        作用暂时不明
+    }
     interface RtpRtcp {
         SendOutgoingData()
     }
     interface RtcpFeedbackSenderInterface
     RtpVideoSender ...|> RtpVideoSenderInterface
     RtpVideoSender "1" *--> "*" RtpRtcp
+    RtpVideoSender o-> RtpTransportControllerSendInterface
     RtpRtcp --|> Module
     RtpRtcp --|> RtcpFeedbackSenderInterface
 }
 ```
-目光转移到RtpVideoSender,它使用RtpRtcp。RtpRtcp从名字上看rtp,rtcp全包了,父类RtcpFeedbackSenderInterface明显是用于发送rtcp包。
+目光转移到 RtpVideoSender ,它使用RtpRtcp。RtpRtcp从名字上看rtp,rtcp全包了,父类 RtcpFeedbackSenderInterface 明显是用于处理rtcp包。  
+RtpRtcp 接收从 RtpVideoSender 传来的 Transport, 并使用。 所有的RtpRtcp 实例共享一个 Transport. 
 ```plantuml
 package webrtc { 
     class RTPSender {
@@ -193,19 +206,23 @@ package webrtc {
     RTPSender *--> RTPSenderAudio
 }
 ```
+RtpSender 拥有 RtpSenderVideo/RtpSenderAudio 因此可以发AV两种数据。 
 ```plantuml
-participant video_sender_ <<RTPVideoSender>>  
-participant ModuleRtpRtcpImpl
-participant rtp_sender_ <<RTPSender>>
--> video_sender_ : OnEncodedImage
-video_sender_ -> ModuleRtpRtcpImpl : SendOutgoingData
-ModuleRtpRtcpImpl -> rtp_sender_ : SendOutgoingData
-rtp_sender_ -> RTPSenderVideo : SendVideo
-RTPSenderVideo -> rtp_sender_ : SendToNetwork
-rtp_sender_ -> Transport : SendRtp 
+participant RtpVideoSender as rvs <<RTPVideoSenderInterface>>  
+participant ModuleRtpRtcpImpl as mrtprtcpi <<RtpRtcp>>
+participant rtp_sender_  as rtps <<RTPSender>>
+participant rtpsendervideo as rptsv <<RTPSenderVideo>>
+participant transport_ as transport <<Transport>>
+
+-> rvs : OnEncodedImage
+rvs -> mrtprtcpi : SendOutgoingData
+mrtprtcpi -> rtps : SendOutgoingData
+rtps -> rptsv : SendVideo
+rptsv -> rtps : SendToNetwork
+rtps -> transport : SendRtp 
 ```
-在RTPSender中，区分了音频和视频，然后各自发送。以Video为例。
-到了RTPSenderVideo后，就打成RTP包。交给Transport。
+在 RTPSender 中，区分了音频和视频，然后各自发送。以 Video 为例。
+到了RTPSenderVideo后，就打成RTP包。交给 Transport 。
 ````plantuml
 title "video"
 package webrtc { 
@@ -225,30 +242,28 @@ package cricket {
         SetOption()
     }
     MediaChannel +-- NetworkInterface
-    VideoMediaChannel -left-|> MediaChannel
-    WebRtcVideoChannel -up-|> VideoMediaChannel
-    WebRtcVideoChannel -left-|> Transport
+    VideoMediaChannel --|> MediaChannel
+    WebRtcVideoChannel --|> VideoMediaChannel
+    WebRtcVideoChannel --|> Transport
     WebRtcVideoChannel o--> Call 
 
     BaseChannel ..|> NetworkInterface
     BaseChannel *-- RtpTransportInternal
-    RtpDataChannel --|> BaseChannel
     VoiceChannel --|> BaseChannel
     VideoChannel --|> BaseChannel
 }
 ````
+从 WebRtcVideoChannel 看起，它是 Transport 派生类，可用于发数据，上层可通过 Transport 向它传数据。它使用 NewworkInterface 完成实际发送。实质发送由 NetworkInerface 派生类完成，即:  VideoChannel
 ```plantuml
-participant WebRtcVideoChannel  
-participant BaseChannel <<NetworkInterface>>
--> WebRtcVideoChannel : SendRtp
-WebRtcVideoChannel -> BaseChannel
-BaseChannel -> RtpTransportInternal
+participant WebRtcVideoChannel as wvc <<Transport>>  
+participant VoiceChannel as bc <<NetworkInterface>>
+participant rtptrasnport as rtpti <<RtpTransportInternal>>
+-> wvc : SendRtp
+wvc -> bc : SendRtp
+bc -> rtpti : SendRtp
 ```
-Transport 用于数据发送
-WebRtcVideoChannel 开始执行
-BaseChannel功能比它的派生类多。
-FAQ:
-1. NetworkInterface 如何与ICE的 Connection 关联起来
+VoiceChannel 派生自 BaseChannel,因此它可以使用 BaseChannel 的功能。
+RtpTransportInernal 是接口，由另一部分提供功能。
 
 ```plantuml
 package webrtc { 
@@ -256,9 +271,9 @@ package webrtc {
     interface SrtpTransportInterface
     interface RtpTransportInternal
     RtpTransport *-- rtc.PacketTransportInternal
-    RtpTransport .left.|> RtpTransportInternal
-    RtpTransportInternal .left.|> SrtpTransportInterface
-    SrtpTransportInterface .left.|> RtpTransportInterface
+    RtpTransport ..|> RtpTransportInternal
+    RtpTransportInternal ..|> SrtpTransportInterface
+    SrtpTransportInterface ..|> RtpTransportInterface
 }
 package rtc {
     interface PacketTransportInternal
@@ -272,8 +287,9 @@ package cricket {
     P2PTransportChannel ..|> IceTransportInternal
 }
 ```
+从 RtpTransport 看起， 使用 PacketTransportInternal 的功能实现发送。实质上使用的是 DtlsTransport, DtlTransport 再使用IceTransportInternal 的功能, 实质上使用的是 P2PTransportChannel.
 ```plantuml
-participant rtp_transport_ <<RtpTransport>> 
+participant rtp_transport_ <<RtpTransportInternal>> 
 participant transport_ <<DtlsTransport>> 
 participant ice_transport_ <<P2PTransportChannel>>  
 participant selected_conn <<Connection>>

@@ -2,10 +2,7 @@
 page 2x2
 package webrtc {
     interface CallFactoryInterface
-    interface AudioEncoderFactory
-    interface videoEncoderFactory
-    interface AudioDecoderFactory
-    interface videoDecoderFactory
+
     interface PeerConnectionInterface
     interface VideoSourceInterface
     interface VideoTrackInterface
@@ -40,6 +37,8 @@ package webrtc {
     PeerConnectionFactory *-> cricket.ChannelManager : <<create and use>>
     PeerConnectionFactory ..left.|> PeerConnectionFactoryInterface
     PeerConnection ...|> rtc.MessageHandle
+    PeerConnection *--> VideoTrackInterface
+    PeerConnection *--> AudioTrackInterface
     PeerConnection .left..|> DataChannelProviderInterface
     PeerConnection .left..|> PeerConnectionInternal
     PeerConnection *--> cricket.SctpTransportInternalFactory

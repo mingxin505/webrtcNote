@@ -107,8 +107,8 @@ namespace webrtc {
 ```plantuml
 @startuml
 title 各层关系图  
-RtpSender -- WebRtcVoiceChannel 
-WebRtcVoiceChannel -- BaseChannel
+RtpSender -- WebRtcVoiceMediaChannel 
+WebRtcVoiceMediaChannel -- BaseChannel
 
 @enduml
 ```
