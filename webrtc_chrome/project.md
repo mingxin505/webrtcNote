@@ -88,7 +88,12 @@ git branch -r //查看已有分支
 无论怎么更新，版本好像停止在m79了。这并不是更新的错误而是：  
 **在2020-01-15的时候，M80，从该版本开始，代码中的分支名称从M80改成了分支号(80是Chromium版本, 分支号是一个单调递增的Chromium分支号码，例如M80对应3987)** 
 如果想查mxx和chromium的对应关系，见[对应关系](https://chromiumdash.appspot.com/branches)
-
+### mac/win 分支不全
+```
+gclient sync --with_branch_heads --with_tags
+cd src
+git pull
+```
 # 工程
 ## *.gn/*.gni;ninja
 depot_tools_tutorial.html)
@@ -151,6 +156,16 @@ Component,表明使用GN的component模板。用于生成动、静态库。
   configs -= [ "//build/config/compiler:no_exceptions" ]
   configs += [ "//build/config/compiler:exceptions" ]
 - 其它的编译参数，直接加cflags_cc/cflags_c里就行。
+
+## 生成Visual Stdio 2019 工程
+```
+set DEPOT_TOOLS_UPDATE=0                                 #不更新depot_tools
+set DEPOT_TOOLS_WIN_TOOLCHAIN=0                          #编译时使用本机VS工具链
+set GYP_MSVS_VERSION=2019 
+set GYP_GENERATORS=msvs-ninja,ninja                      #使用ninja编译
+gn gen -ide=vs2019 --args="is_debug=true" out/vs2019  
+```
+其它版本除去更换版本号外，还要看gn 是不是支持。
 
 # 编译
 ```

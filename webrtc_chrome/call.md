@@ -17,6 +17,7 @@ namespace webrtc {
     note left: for recv fec
     namespace internal {
         class Call {
+            {static} Create()
             ..管理..
             1.  AV 流
             1. 收发 AV 数据
@@ -27,7 +28,9 @@ namespace webrtc {
     }
 }
 ```
-internal::Call 派生自 Call,实现”创建“； 派生自 PacketReceiver 实现数据接收；  
+internal::Call 派生自 webrtc::Call,实现”创建“； 派生自 PacketReceiver 实现数据接收；  
+Call 被 WebRtcVideoEngine/WebRtcAudioEngine 使用，用于创建 Stram.  
+它创建的对象在编解码功能的上层
 ```plantuml
 title "创建ModuleProcessThread“
 participant pcf_  as pcf <<PeerConnectionFactory>>

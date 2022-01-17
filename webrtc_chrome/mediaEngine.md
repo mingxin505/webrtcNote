@@ -1,5 +1,5 @@
 # MediaEngine
-**因为变化较大，这里没依据M70，2022-01-14**
+**因为变化较大，这里没依据M70，依据M97**
 ```plantuml
 package webrtc {
     interface AudioEncoderFactory
@@ -13,6 +13,10 @@ package webrtc {
     
     VideoEncoderFactory ..> VideoEncoder : << create>>
     VideoDecoderFactory ..> VideoDecoder : << create>>
+
+}
+package rtc {
+    interface VideoSourceInterface
 }
 package cricket {
     note  ”废弃了,\n 使用webrtc::VideoEncoderFactory“ as N1
@@ -21,6 +25,7 @@ package cricket {
     N1 .. WebRtcVideoDecoderFactory
     N1 .. WebRtcVideoEncoderFactory
 
+    interface Sink
     interface MediaEngineInterface {
         CreateChannel()
         CreateVideoChannel()
@@ -47,11 +52,22 @@ package cricket {
     WebRtcVoiceEngine o--> AudioEncoderFactory
     WebRtcVoiceEngine o--> AudioMixer
     WebRtcVoiceEngine o--> AudioProcessing
+
+    
+    WebRtcVideoChannel +-- WebRtcVideoReceiveStream
+    WebRtcVideoChannel +-- WebRtcVideoSendStream
+    WebRtcVideoSendStream ..|> rtc.VideoSourceInterface
+
+    WebRtcVoiceMediaChannel +-- WebRtcAudioReceiveStream
+    WebRtcVoiceMediaChannel +-- WebRtcAudioSendStream
+    WebRtcAudioSendStream ..|> Sink
+    Audiosource +-- Sink
 } 
 ```
 ChannelManager 被 PeerConnectionFactory 拥有,PeerConnection 持有 PerrConnectionFactory 实例，所以相关的创建活动由PeerConnection发起与操作。  
 WebRtcAudio/VideoEngine 负责创建各自的 MediaChannel， 被 ChannelManager 使用。    
 MediaEngineInterface 在 PeerConnectionFactoryDependience里，所以 PeerConnectionFactory 能访问到，PeerConnection 也能访问到。  
+WebRtcVideoSendStream 派生自 VideoSourceInterface, 意在成为一个source, source 可以接多个Sink;实际它只是个wrapper。
 ```plantuml
 title "创建 VoiceChannel"
 participant chm  as chm <<ChannelManager>>
@@ -68,5 +84,28 @@ create vc
 chm -> vc : new(VoiceMediaChannel)
 return 
 ```
+
+```plantuml
+title "创建WebRtcVideoSendStream“
+participant WebRtcVideoChannel  as webrtcVC <<VideoChannel>>
+participant WebRtcVideoSendStream  as webrtcVSS <<WebRtcVideoSendStream>>
+participant VideoSendStream  as vss <<VideoSendStream>>
+participant VideoSendStreamEncoder  as vsse <<VideoSendStreamEncoder>>
+participant internal.Call  as call <<webrtc.Call>>
+[-> webrtcVC : AddSendStream
+create webrtcVSS
+webrtcVC -> webrtcVSS : new
+create vss
+webrtcVSS -> vss : new
+create vsse
+vss -> vsse : new
+=====
+-> webrtcVSS : RecreateWebRtcStram
+webrtcVSS -> call : CreateVideoSendStram
+return VideoSendStream
+```
+第一次创建的时候由 WebRtcVideoChannel::AddSendStream 触发。  
+之后 WebRtcVideoSendStream 使用 Call 重新创建 VideoSendStream.  
+VideoSendStram 中 创建 VideoSendStreamEncoder， 它是编码的入口。
 
 
