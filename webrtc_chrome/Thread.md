@@ -1,3 +1,4 @@
+本质上说， Thread/PorcessThread 都是”命令“模式的实现。  
 # thread  
 
 ## 结构
@@ -73,7 +74,7 @@ pci -> QueuedTask : Run
 end
 ```
 ```plantuml
-title "添加"
+title "添加/注册/执行"
 participant pci_  as pci <<ProcessThreadImpl>>
 participant mod_  as mod <<Module>>
 participant qtasks_  as qtasks <<QueuedTask>>
@@ -83,6 +84,17 @@ pci -> pci : push queue
 [-> pci : RegisterModule
 pci -> mod : ProcessThreadAttached(this)
 pci -> pci : push queue
+==执行==
+[-> pci : run
+pci -> pci : Process
+alt next_callback < now
+pci -> mod : Process
+pci -> pci : GetNextCallbackTime
+pci -> mod : TimeUntilNextProcess
+loop queue.empty
+pci -> qtasks : run
+end
+end
 ```
 如上图， mod 有机会知道处理自己的线程。派生类可以根据需要决定是否保存线程指针。  
 使用方式也很简单明了了。如果是模块，就从 Module 派生，然后把自己注册给 ProcessThread;如果是任务，从 QueuedTask 派生， 然后 Post 给 ProcessThread.  

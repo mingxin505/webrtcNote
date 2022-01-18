@@ -1,3 +1,4 @@
+# 未完成
 # 用户角度
 ```plantuml
 @startuml
@@ -8,11 +9,17 @@ package webrtc {
     () VideoSourceInterface
     () AudioTrackInterface
     () VideoTrackInterface
+
+    [gather]
+    [codec]
+    [transport]
+    [peerconnection] - PeerConnection
 }
 package rtc {
     () AdaptedVideoTrackSource 
     note left: "this is note"
 }
+
 @enduml
 ```
 

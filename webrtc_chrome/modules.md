@@ -1,114 +1,82 @@
-# 组件关系
+# 模块
+模块是 webrtc 的一个组成部分，可以代指"活动对象"。
 ```plantuml
 @startuml
-title  Voice 为主，还是没找到核心流程， 从哪儿来，到哪儿去，没搞清楚 
-namespace webrtc { 
-    class RTPSender {
+namespace webrtc {
+interface Module
+interface ModuleRtpRtcp
+interface RtcpFeedbackSenderInterface
+interface VideoCodingModule
+interface RtpPacketSender
+interface PacketSender
+interface Pacer
+interface SendSideCongestionControllerInterface
+interface TransportFeedbackObserver
+interface CallStatsObserver
+namespace vcm {
+    VideoReceiver ..|> webrtc.Module
+}
+RTCPReceiver +- ModuleRtpRtcp
 
-    }
-    Interface Transport {
-        + sendRtp()
-        + sendRtcp()
-        ==
-        1. 用于输出
-    }
-    class OrtcpRtpSenderAdapter {}
-    class OrtcpRtpReceiverAdapter {}
-    RtpRtcp --> ModuleRtpRtcpImpl : create >
-    RTCPReceiver +-- ModuleRtpRtcp 
-    ModuleRtpRtcpImpl ---|> RtpRtcp
-    ModuleRtpRtcpImpl ---|> ModuleRtpRtcp
-    ModuleRtpRtcpImpl *-- RTPSender
-    RTPSender o-- Transport
-    RTPSender o-- RTPSenderAudio
-    BaseChannel <|- MediaChannel
-    OrtcpRtpSenderAdapter ..> cricket.VoiceChannel
-    OrtcpRtpReceiverAdapter ..> cricket.VoiceChannel
+ProcessThreadImpl +-- ModuleCallback
+ModuleCallback o-> Module
+
+ModuleRtpRtcpImpl ..|> RtpRtcp
+note right: M97 中废除了。\n 派生类ModuleRtpRtcpImpl \n变成 ModuleRtpRtcpImpl2
+ModuleRtpRtcpImpl ..|> ModuleRtpRtcp
+
+RtpRtcp ..|> RtcpFeedbackSenderInterface
+RtpRtcp ..|> Module
+
+
+VideoCodingModuleImpl ..|> VideoCodingModule
+VideoCodingModule ..|> Module
+
+AudioCodingModule <|.. AudioCodingModuleImpl
+PacedSender ..|> Pacer
+Pacer ..|> Module
+Pacer ..|> RtpPacketSender
+
+PacerSender +-- PacketSender
+
+SendSideCongestionController ..|> SendSideCongestionControllerInterface
+note left: "M97 已废除”
+SendSideCongestionControllerInterface ..|> Module
+SendSideCongestionControllerInterface ..|> TransportFeedbackObserver
+SendSideCongestionControllerInterface ..|> CallStatsObserver
 
 }
-namespace cricket { 
-    class BaseChannel {
-        1. 距离IO更近
-    }
-    class MediaChannel {}
-    class WebRtcMediaEngineFactory {
-        1. 使用VideoEnc/Dec
-        1. 使用AudioEnc/Dec
-    } 
-    interface MediaEngineInterface {
-    }
-    Abstract MediaChannel {}
-    interface NetworkInterface {}
-    interface RtpTransportControllerInterface
-    class CompositeMediaEngine <WebRtcVoiceEngine,VideoEngine >{ 
-    } 
-    class WebRtcVoiceEngine {
-        1. WebRtcVoiceMediaChannel的友元
-    }
+package rtc {
 
-    MediaChannel o-- NetworkInterface
-    NetworkInterface --+ MediaChannel 
-    note "networkInterface是内部类\n" as N1
-    MediaChannel .. N1
-    N1 .. NetworkInterface
+}
+package cricket {
 
-    ChannelManager --> VoiceChannel : create 
-    BaseChannel --|> NetworkInterface
-    BaseChannel o-- MediaChannel
-    VoiceChannel --|> BaseChannel
-    VoiceChannel o--VoiceMediaChannel
-    WebRtcMediaEngineFactory -->CompositeMediaEngine : create >
-    CompositeMediaEngine -|> MediaEngineInterface
-    MediaEngineInterface --> VideoMediaChannel : create >
-    MediaEngineInterface --> VoiceMediaChannel : create >
-    WebRtcVoiceEngine --> WebRtcVoiceMediaChannel : create
-    WebRtcVoiceMediaChannel --|> VoiceMediaChannel
-    VoiceMediaChannel --|> MediaChannel
-    WebRtcVoiceMediaChannel --|> webrtc.Transport
 }
 @enduml
 ```
+ModuleRtpRtcp 用于处理常规 RTCP 包。  
+AudioCodingModule  不是 module 的派生类。  
 ```plantuml
 @startuml
-title "从上到下，注重Video"
-namespace webrtc { 
-    interface ObserverInterface
-    interface MediaStreamInterface
-    interface AudioTrackerInterface
-    interface PeerconnectionInterface
-    interface VideoStreamEncoderInterface
-    class PeerConnection {
-        1. 接口的实现
-    }
-    class Notifier < T > {
-        1. 它派生自T 
-        1. 在此语境下，T是MediaStreamInterfce 
-    }
-    class MediaStream {
-        1. 感觉更像是个容器。
-        1. 它是主题
-        1. AudioRtpReceiver/Sender是观察者
-    }
+title "创建 SendSideCongestionController"  
+participant RtpTransportControllserAdapter as adapter <<RtpTransportControllerInterface>>>>  
 
-    VideoSendStream *-- VideoStreamEncoderInterface : 指向 VideoStreamEncoder
-    AudioRtpReceiver --|> ObserverInterface
-    AudioRtpSender --|> ObserverInterface
-    PeerConnection "1" *-- "*" MediaStream : owner and create >
-    MediaStream --|> Notifier
-    Notifier --> ObserverInterface : use
-    MediaStream "1" o-- "*" AudioTrackerInterface : owner >
-    PeerconnectionInternal ---|> PeerconnectionInterface
-    PeerConnection ---|> PeerconnectionInternal
-}
+participant RtpTransportControllerSend as rtptcs <<RtpTransportControllerSendInterface>>  
+participant SendSideCongestionController as ssccr <<SendSideCongestionControllerInterface>> 
+participant internall.Call as call <<webrtc::Call>> 
+
+
+-> adapter : init_w
+activate adapter
+create rtptcs
+adapter -> rtptcs : new
+activate rtptcs
+create ssccr
+rtptcs -> ssccr : new
+return RtpTransportControllerSend
+create call
+adapter -> call : Create(RtpTransportControllerSend)
 
 @enduml
 ```
-
-```plantuml
-@startuml
-title 各层关系图  
-RtpSender -- WebRtcVoiceMediaChannel 
-WebRtcVoiceMediaChannel -- BaseChannel
-
-@enduml
-```
+最终被传递给了 Call 
