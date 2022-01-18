@@ -27,8 +27,8 @@ package cricket {
 
     interface Sink
     interface MediaEngineInterface {
-        CreateChannel()
-        CreateVideoChannel()
+        voice() const 
+        video() const
     }
     class ChannelManager
     class WebRtcMediaEngineFactory {
@@ -44,16 +44,18 @@ package cricket {
     note on link: 接口间创建关系
     WebRtcMediaEngineFactory ..> CompositeMediaEngine : <<create>>
 
-
+    WebRtcVideoEngine ..> WebRtcVideoChannel : <<create>>
     WebRtcVideoEngine o-> VideoDecoderFactory
     WebRtcVideoEngine o-> VideoEncoderFactory
 
+
+    WebRtcVoiceEngine ..> WebRtcVoiceMediaChannel : <<create>>
     WebRtcVoiceEngine o--> AudioDecoderFactory
     WebRtcVoiceEngine o--> AudioEncoderFactory
     WebRtcVoiceEngine o--> AudioMixer
     WebRtcVoiceEngine o--> AudioProcessing
 
-    
+    WebRtcVideoChannel --|> VideoMediaChannel
     WebRtcVideoChannel +-- WebRtcVideoReceiveStream
     WebRtcVideoChannel +-- WebRtcVideoSendStream
     WebRtcVideoSendStream ..|> rtc.VideoSourceInterface
@@ -73,7 +75,7 @@ title "创建 VoiceChannel"
 participant chm  as chm <<ChannelManager>>
 participant ve  as ve <<MediaEngineInterface>>
 participant WebRtcVoiceMediaChannel  as vmc <<VoiceMediaChannel>>
-participant vc  as vc <<VoiceChannel>>
+participant WebRtcVoiceMediaChannel  as vc <<VoiceChannel>>
 
 [-> chm : CreateVoiceChannel
 chm -> ve : CreateChannel
