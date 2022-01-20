@@ -15,6 +15,8 @@
 - [媒体引擎](./mediaEngine.md)
 # 组件
 - [total](./component.md)
+- [gather](./gather.md)
+- [codec](./codec.md)
 - [modual](./modules.md)
 - [network IO](./socket.md)
 - [thread](./Thread.md)
