@@ -16,8 +16,10 @@ namespace webrtc {
         OnRecoverdPacket()
     }
     note left: for recv fec
+    interface RtpTransportControllerSendInterface
+
+
     namespace internal {
-        interface RtpTransportControllerSendInterface
         class Call {
             {static} Create()
             ..管理..
@@ -29,13 +31,14 @@ namespace webrtc {
         Call --|> webrtc.PacketReceiver
         Call --|> webrtc.RecoverdPacketReceiver
     }
+    note "用于拥塞与流控。" as N1
+    N1 .. RtpTransportControllerSendInterface
 }
 ```
 CallFactory 作为 Call 的工厂，创建具体 Call 实例。  
 internal::Call 派生自 webrtc::Call,实现”创建“自身； 派生自 PacketReceiver 实现数据接收；  
 Call 被 WebRtcVideoEngine/WebRtcAudioEngine 使用，用于创建 Stram.  
 它创建的对象在编解码功能的上层.  
-RtpTransportControllerSendInterface 实例用于拥塞与流控。
 ```plantuml
 title "创建ModuleProcessThread“
 participant pcf_  as pcf <<PeerConnectionFactory>>

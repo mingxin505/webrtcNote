@@ -111,3 +111,31 @@ return VideoSendStream
 VideoSendStram 中 创建 VideoSendStreamEncoder， 它是编码的入口。
 
 
+```plantuml
+@startuml
+title "RTCP 参数“
+package webrtc {
+    class RtpCodecParameters
+}
+package cricket {
+    enum CodecType {
+        CODEC_VIDEO,
+        CODEC_RED,
+        CODEC_RTX,
+        CODEC_FLEXFEC,
+        CODEC_ULPFEC
+    }
+    class Codec {
+        name : string
+        id : int
+        params : CodecParameterMap
+    }
+    Codec *-> FeedbackParams
+    FeedbackParams "1" *--> "*" FeedbackParam
+    VideoCodec --|> Codec
+    VideoCodec +-- CodecType
+    VideoCodec ..> RtpCodecParameters : <<create>>
+}
+@enduml
+```
+VideoCodec 生成 RtpCodecParameters , 然后交给SDP.

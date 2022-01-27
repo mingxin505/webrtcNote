@@ -177,7 +177,8 @@ VideoSendStreamImpl 从 VideoStreamEncoderInterface::EncoderSink 派生，意在
 package webrtc { 
     interface RtpVideoSenderInterface
     interface RtpTransportControllerSendInterface {
-        作用暂时不明
+        用于拥塞与流量控制。
+        eg: gcc/twcc
     }
     interface RtpRtcp {
         SendOutgoingData()
