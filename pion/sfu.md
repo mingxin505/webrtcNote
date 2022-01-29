@@ -3,6 +3,7 @@
 ```plantuml
 @startuml
 namespace sfu {
+    interface Peer
     interface Receiver
     interface Router
     interface Session
@@ -94,3 +95,6 @@ namespace sfu {
 }
 @enduml
 ```
+SFU 代表整个程序空间，管理与创建 Session ; Session 代表一个群组、房间、会议; Peer 代表一路连接（可能是推流也可能是拉流，也可能是推拉都有)。 
+Publisher 代表一个推流的 Peer; Subscriber 则代表一个拉流的 Peer。
+Publisher 使用 router 把对应的数据广播到对应的 subscriber 中。
