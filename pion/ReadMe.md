@@ -1,6 +1,6 @@
 # pion
 ## [简介](./beginer.md)
-## [SFU](.sfu.md)
+## [SFU](./sfu.md)
 Pion 实现的服务端口
 ## [类图](./webrtc.md)
 主要类间的关系
