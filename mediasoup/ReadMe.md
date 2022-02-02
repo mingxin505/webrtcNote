@@ -70,15 +70,3 @@ N2 .left. Transport
 title ""
 @enduml
 ```
-## 核心
-
-
-```plantuml
-@startuml
-
-class A {
-
-}
-
-@enduml
-```
