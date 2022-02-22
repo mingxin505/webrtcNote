@@ -86,23 +86,23 @@ title ""
 
 ```plantuml
 @startuml
+skinparam handwritten true
 title ""
 package erizo {
 interface PipelineManager
 interface PipelineContext
-class PipelineBase {
+class PipelineBase #line.bold;line:black;text:red; {
     有模板函数，这个如何表达？
 }
-
 
 class ContextImplBase<<H Context>>
 interface OutboundHandlerContext
 interface OutboundLink
 interface InboundHandlerContext
 interface InboundLink
-class ContextImpl<<H>>
-class OutboundContextImpl <<H>>
-class InboundContextImpl <<H>>
+class ContextImpl<? H>
+class OutboundContextImpl <? H>
+class InboundContextImpl <? H>
 
 PipelineBase *--- PipelineManager
 PipelineBase "1" *-- "3" PipelineContext
@@ -131,15 +131,15 @@ OutboundContextImpl o---> PipelineBase
 
 interface ServiceContext
 interface PipelineServiceContext
-ServiceContextImplBase<<s Context>>
-ServiceContextImpl<<Service>>
+class ServiceContextImplBase<? S Context >
+class ServiceContextImpl<? Service >
 
 ServiceContextImpl .up.|> ServiceContext
 ServiceContextImpl .up.|> ServiceContextImplBase
 ServiceContextImpl ...|> PipelineServiceContext
 ServiceContextImpl o---> PipelineBase
 
-ServiceBase<<ServiceContext>>
+class ServiceBase<? ServiceContext>
 Service ..|> ServiceBase
 Service o--> ServiceContext
 note "**service 如何触发的，还没搞清楚**" as N1
@@ -169,15 +169,27 @@ title ""
 title ""
 @enduml
 ```
-
+plantuml 可以使用的图形库
 ```plantuml
 @startuml
-title ""
+stdlib
 @enduml
 ```
-
+plantuml 皮肤参数
 ```plantuml
 @startuml
-title ""
+help skinparams
+@enduml
+```
+```plantuml
+@startuml
+title "communication diagram"
+rectangle A
+rectangle B
+rectangle C
+A <--> B : 1. a->b call\n 2. b->a call
+A --> C : 3. a->c deliver\n
+C -- C : 4. c->c send \n \
+5. c -> c : udpsend
 @enduml
 ```
