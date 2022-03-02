@@ -1,5 +1,6 @@
 # server
 1. js 与 c++ 通信 
+1. websocket 作为信令协议
 ### proto.server/proto.client
 1. req/res/notify
 1. c-s
@@ -47,6 +48,8 @@ note right: 协议集中处理区
 @enduml
 ```  
 # client
+启动的工作目录昌server/public  
+
 ```plantuml
 @startuml
 title ""
