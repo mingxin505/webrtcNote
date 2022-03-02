@@ -1,4 +1,3 @@
-
 # 前提
 1. mediaSoup 分 C、S两端。  
 1. 是SFU，只管选择-转发
@@ -9,6 +8,7 @@
 如图所示， 推流端是“生产者”(webrtc的流也可以是rtp的流)， 拉流(录制)端是消费者，通过路由(router)连接。
 1. [worker 实现](./worker.md)
 1. [demo](./demo.md)
+1. [nodejs](./js.md)
 ## API类图
 ```plantuml
 @startuml
