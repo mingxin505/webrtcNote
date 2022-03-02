@@ -1,5 +1,5 @@
 ## node/lib 目录
-可以理解为js空间内c++对应对象的映射。  
+可以理解为js空间内c++对象的映射。  
 1. AudioLevelObserver.js  
           用于检测声音的大小， 通过C++检测音频声音返回应用层，通过Observer接收并展示音频大小
 1. Channel.js
