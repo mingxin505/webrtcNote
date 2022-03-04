@@ -1,5 +1,6 @@
 # server
-1. js 与 c++ 通信. 对C++来说就是包含了nodejs的库、符合nodes规范的C++库；对js来说就是一个普通的模块。
+1. js 与 c++ 通信  对C++来说就是包含了nodejs的库、符合nodes规范的C++库；对js来说就是一个普通的模块。
+1. websocket 作为信令协议
 ### proto.server/proto.client
 1. req/res/notify
 1. c-s
@@ -47,6 +48,8 @@ note right: 协议集中处理区
 @enduml
 ```  
 # client
+启动的工作目录昌server/public  
+
 ```plantuml
 @startuml
 title ""
@@ -64,4 +67,4 @@ title ""
 @startuml
 title ""
 @enduml
-``` 
+```
